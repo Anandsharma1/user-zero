@@ -41,6 +41,23 @@ Two things make it more than "ask an AI to look at my UI":
 2. **Every finding needs proof.** A screenshot, the exact screen, what a user
    loses, and a specific fix. No "this feels cluttered."
 
+## Two ways to run it
+
+Pick by what you want the output to be good for.
+
+| | `glance` | Full mode (charters) |
+|---|---|---|
+| **Setup** | none — just a URL | a profile, then one charter per feature |
+| **Uses the app** | yes — journeys, clicks, navigation, console | yes |
+| **Checks data** | consistency, honesty, plausibility, persistence | all of that, **plus correctness against your spec, API and database** |
+| **Reproduces findings** | no | yes, from a fresh context |
+| **Coverage** | what it reached, stated plainly | a required checklist, gated |
+| **Output is** | an expert's opinions, judge each on its screenshot | evidence you can pin as a test and cite in a decision |
+| **Good for** | "what's wrong with this page", deciding where a charter is worth writing | anything you need to rely on |
+
+Same evaluator and same expertise in both. The difference is entirely in what
+surrounds it.
+
 ---
 
 ## Quick start
@@ -115,8 +132,13 @@ Want to see it work without touching your product? Skip to
 
 ## How a run works, step by step
 
-A **charter** is one testing mission: a screen or feature, a kind of user, and
-the question you want answered. Running one goes like this.
+This is the **full mode**. A **charter** is one testing mission: a screen or
+feature, a kind of user, and the question you want answered. Running one goes
+like this.
+
+(`glance` is roughly steps 3 and 5 with nothing around them — it explores and
+reports, then stops. No health-gated startup, no required checklist, no oracle
+pass, no reproduction.)
 
 **1. Start the app and check it is really up.**
 Uses the commands in your `PROFILE.md`. If the health check fails, it stops —
@@ -202,6 +224,7 @@ checks it stays quiet. Seven scores, each with a pass mark.
 
 | Piece | What it does |
 |---|---|
+| `/ui-qa glance` | one expert look at a screen, no setup — see the table above |
 | `/ui-qa` command | runs charters, writes new ones, runs calibration |
 | `user-zero` agent | the evaluator itself — a senior UX reviewer who tests as your user but explains problems like an expert |
 | `PROFILE.md` | the one file describing *your* product: how to start it, who your users are, your wording and formatting rules, where your specs live |
@@ -321,7 +344,7 @@ your-repo/
 │   ├── agents/user-zero.md          the evaluator
 │   ├── references/                  taxonomy, charter/profile/evidence schemas,
 │   │                                coverage contract, Pass-A dispatch,
-│   │                                calibration protocol, cohorts
+│   │                                calibration protocol, cohorts, glance mode
 │   ├── lenses/                      the ten optional lens packs
 │   ├── adapters/                    browser tool bindings
 │   └── scripts/verify-run.sh        the post-run check
