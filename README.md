@@ -221,7 +221,7 @@ you.
 | `scripts/check-platform-sync.sh` | fail if those pointers drift |
 | `skills/ui-qa/scripts/verify-run.sh` | the post-run check from step 7 |
 | `fixtures/serve.sh`, `fixtures/probe.sh` | the practice app and its bug checker |
-| `tests/run-tests.sh` | 73 tests for all of the above |
+| `tests/run-tests.sh` | 79 tests for all of the above |
 
 ---
 

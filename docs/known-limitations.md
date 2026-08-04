@@ -66,7 +66,7 @@ P0s.
 | Layer-1 purity | automated: no machine or product paths in `skills/` or `templates/`; every intra-skill reference resolves |
 | Adapter tool caveats | measured by hand on Playwright MCP 0.0.78 (2026-07-31), with the probe results recorded |
 
-`tests/run-tests.sh` — 73 tests, no dependencies. Every one exists because a
+`tests/run-tests.sh` — 79 tests, no dependencies. Every one exists because a
 reviewer found the corresponding hole by hand.
 
 ## What has NOT been verified
