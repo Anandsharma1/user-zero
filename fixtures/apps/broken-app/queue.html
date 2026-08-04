@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Portfolio Reconciliation Console</title>
+<style>
+  :root { --ink:#1c1c1e; --muted:#8a8a8f; --line:#e2e2e6; --accent:#2b5cd9; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 -apple-system,Segoe UI,Roboto,sans-serif;
+         color:var(--ink); }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); }
+  h1 { font-size:19px; margin:0; }
+  main { padding:20px; max-width:1400px; }
+  .spread { display:flex; gap:60px; }
+  .left { width:180px; }
+  .right { flex:1; max-width:420px; }
+  .empty { border:1px dashed var(--line); border-radius:6px; padding:40px 20px;
+           text-align:center; color:var(--muted); }
+  input[type=text] { font:inherit; padding:6px 8px; border:1px solid var(--line);
+                     border-radius:4px; width:100%; }
+  .err { color:#c0392b; font-size:13px; }
+  button { font:inherit; }
+  .primary { background:var(--accent); color:#fff; border:1px solid var(--accent);
+             border-radius:5px; padding:7px 14px; }
+  .spinner { display:none; margin-top:12px; color:var(--muted); }
+  :focus { outline:none; }
+</style>
+</head>
+<body>
+<header><h1>Portfolio Reconciliation Console</h1></header>
+
+<main>
+
+  <h1>Operations queue</h1>
+
+  <div class="spread">
+    <div class="left"></div>
+    <div class="right">
+      <div class="empty">No records.</div>
+
+      <h2>Escalate a position</h2>
+      <p><label>Instrument</label>
+         <input type="text" id="instrument" placeholder="Instrument"></p>
+      <p><label>Settlement date</label>
+         <input type="text" id="settles" placeholder="Settlement date"></p>
+      <p><label>Quantity</label>
+         <input type="text" id="qty" placeholder="Quantity"></p>
+      <p id="errs" class="err"></p>
+      <p><button class="primary" id="go">Submit</button>
+         <button class="primary" disabled>Escalate</button></p>
+      <div class="spinner" id="spin">Working…</div>
+    </div>
+  </div>
+</main>
+
+<script>
+
+  ['instrument','settles','qty'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', function () {
+      var v = this.value;
+      document.getElementById('errs').textContent =
+        v.length && v.length < 4 ? 'Invalid input' : '';
+    });
+  });
+
+  document.getElementById('go').addEventListener('click', function () {
+    var spin = document.getElementById('spin');
+    spin.style.display = 'block';
+    setTimeout(function () {
+      document.getElementById('errs').textContent = 'Invalid input';
+      ['instrument','settles','qty'].forEach(function (id) {
+        document.getElementById(id).value = '';
+      });
+    }, 2500);
+  });
+</script>
+</body>
+</html>

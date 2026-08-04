@@ -1,0 +1,50 @@
+# Control registry for the fixture apps. THIS IS THE ANSWER KEY.
+#
+# It lives OUTSIDE fixtures/apps/, which is the only directory serve.sh exposes,
+# so it is not fetchable from the browser the explorer drives. It was previously
+# served at /controls.tsv -- an answer key reachable by the thing being measured.
+#
+# Do not read this file into a session that will run the explorer, and never put
+# any of it into the served files: probe.sh greps the source from outside, and the
+# served HTML/CSS/JS carries no comments at all (a test enforces that).
+#
+# Columns:
+#   id         stable control id
+#   class      defect class, for the floor check and authority scoping
+#   page       path under fixtures/apps/
+#   probe      literal string that must be PRESENT for the defect to exist ("-" = none)
+#   antiprobe  literal string that must be ABSENT ("-" = none). This is what makes
+#              "armed" mean "defect present AND fix absent": several probes would
+#              otherwise survive the repair they are meant to detect -- adding an
+#              aria-label does not remove the button markup.
+#   signature  what a run that found it must report
+#
+# id	class	page	probe	antiprobe	signature
+KD-F01	functional	broken-app/index.html	applyBtn').addEventListener('click', function () {}	-	The status filter's Apply button does nothing: choosing a status and applying never changes the table.
+KD-F02	functional	broken-app/index.html	getElementById('qty').value = '';	-	Saving a position clears the entered quantity and shows success, but the value is not applied anywhere on screen.
+KD-D01	semantic/data	broken-app/index.html	73.4%	of 15	A match rate is given to one decimal place with no denominator or sample size, implying precision its own basis cannot support.
+KD-D02	semantic/data	broken-app/index.html	>1234.5<	1,234.50	A monetary amount is rendered with no currency, no thousands separator and one decimal place.
+KD-D03	misleading zero	broken-app/index.html	<div class="v">0</div>	Not provided	"Positions reviewed: 0" is indistinguishable from unavailable data; nothing marks a missing value as missing.
+KD-D04	semantic/data	broken-app/index.html	03/08/2026	August	An all-numeric date on a decision surface is ambiguous between day-first and month-first order.
+KD-L01	raw-ID or label leak	broken-app/index.html	a7f3c9e2-51bd-4c8a-9f10-6d2e4b7c8a91	-	A raw UUID appears in the Status column where a human-readable status belongs.
+KD-L02	raw-ID or label leak	broken-app/index.html	RECON_BATCH_SUMMARY	-	A section heading is an internal identifier in screaming snake case rather than the user's words.
+KD-L03	raw-ID or label leak	broken-app/index.html	UNMATCHED_PENDING_REVIEW	Awaiting review	Enum tokens are shown as status values and as dropdown options.
+KD-C01	console/network failure	broken-app/index.html	reconciliation/telemetry	-	A request fails on load and logs a console error while the screen looks entirely healthy.
+KD-A01	accessibility	broken-app/index.html	:focus { outline:none	focus-visible	The focus indicator is removed globally, so keyboard traversal is invisible.
+KD-A02	accessibility	broken-app/index.html	onclick="removeRow(this)	aria-label	Icon-only info and delete buttons have no accessible name, and their targets are a few pixels tall.
+KD-A03	accessibility	broken-app/index.html	color:#b6b6bb	-	Hint text sits at roughly 1.9:1 contrast, far below the 4.5:1 floor.
+KD-V01	visual/usability	broken-app/index.html	max-width:90px	-	The Instrument column takes 44% of the table while Custodian reference is clipped at 90px; widths are inverted relative to content length.
+KD-V02	visual/usability	broken-app/index.html	h2 { font-size:19px	h2 { font-size:17px	Section headings are the same size as the page title, so the hierarchy is flat.
+KD-V03	visual/usability	broken-app/index.html	max-width:none	-	A prose paragraph runs the full window width with no measure cap, well past a readable line length.
+KD-V04	visual/usability	broken-app/index.html	<td>v10</td>	-	A version-like column sorts lexically, so v10 files before v9.
+KD-P01	component appropriateness	broken-app/index.html	<select id="statusFilter"	type="radio"	Three mutually exclusive options are hidden behind a dropdown where radios would show all of them.
+KD-P02	component appropriateness	broken-app/index.html	showModal	-	Position detail opens in a modal that hides the row it refers to, and the modal has no URL.
+KD-P03	component appropriateness	broken-app/index.html	class="quiet" onclick="purgeAll()	confirm	A destructive purge is styled as a quiet underlined link and sits beside the primary export action, with no confirmation and no undo.
+KD-S01	state honesty	broken-app/index.html	'Position updated'	-	A success toast fires before anything is persisted, and disappears after 1.2s.
+KD-S02	state honesty	broken-app/queue.html	spin.style.display = 'block'	progress	An indeterminate spinner runs with no progress, no expectation set, and no distinction between slow and stuck.
+KD-N01	navigation	broken-app/queue.html	Operations queue	queue.html	The queue page is reachable only by typing the URL; nothing links to it and it offers no route back.
+KD-N02	navigation	broken-app/index.html	-	aria-current	No orientation anywhere: no breadcrumb, no active nav state, no in-page back affordance.
+KD-E01	state honesty	broken-app/queue.html	>No records.<	-	An empty state says only "No records", conflating first-run, no-results and failure.
+KD-R01	forms	broken-app/queue.html	addEventListener('input'	-	Validation fires on every keystroke, the error text is generic and far from the fields, and a failed submit clears every value the user typed.
+KD-R02	forms	broken-app/queue.html	class="primary" disabled	aria-describedby	A disabled action gives no explanation of what would enable it.
+KD-R03	forms	broken-app/queue.html	placeholder="Settlement date"	<label for=	Fields rely on placeholders instead of persistent labels, and a date is a free-text box with no format guidance.

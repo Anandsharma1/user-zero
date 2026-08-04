@@ -1,0 +1,9 @@
+{
+  "_comment": "Copy to .mcp.json for Claude Code. Codex does NOT read this file — register the server under CODEX_HOME instead (see skills/ui-qa/adapters/playwright-mcp.md). Version is pinned deliberately; the adapter's measured tool caveats apply to this version.",
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@0.0.78", "--isolated"]
+    }
+  }
+}

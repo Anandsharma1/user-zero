@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Block commits whose *staged content* leaves the generated platform stubs out
+# of sync with the canonical skill.
+#
+# --from-index is the whole point: checking the working tree passes while a
+# partially staged commit records a stale stub, and a stale stub means Claude
+# Code and Codex can dispatch different evaluators -- exactly the failure this
+# repo's single-source scheme exists to prevent.
+#
+# Install: ./scripts/install-git-hooks.sh
+# Bypass:  git commit --no-verify   (sparingly)
+
+set -u
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root" || exit 0
+
+# Fail CLOSED. A missing or non-executable checker used to skip the hook, which
+# means the one situation where the guard is most likely to be broken -- someone
+# mid-edit on the tooling -- was also the situation where it silently stopped
+# guarding. Use --no-verify deliberately instead.
+if [ ! -f ./scripts/check-platform-sync.sh ]; then
+  echo "pre-commit: scripts/check-platform-sync.sh is missing. Restore it, or"
+  echo "            commit deliberately with: git commit --no-verify"
+  exit 1
+fi
+if [ ! -x ./scripts/check-platform-sync.sh ]; then
+  echo "pre-commit: scripts/check-platform-sync.sh is not executable."
+  echo "            Fix with: chmod +x scripts/*.sh"
+  exit 1
+fi
+
+./scripts/check-platform-sync.sh --from-index || exit 1
+
+# Layer-1 purity: no product strings, machine paths, or absolute paths in the
+# portable method or its templates.
+#
+# Scans STAGED CONTENT (git show :path), not the file on disk. Selecting staged
+# filenames and then grepping the working tree is the same false green as
+# checking the worktree for stub drift: a leak can be staged and then edited
+# away locally, and the hook would pass on content that is about to be
+# committed.
+leaks=""
+while IFS= read -r path; do
+  [ -n "$path" ] || continue
+  hit=$(git show ":$path" 2>/dev/null \
+        | grep -nIE 'localhost:[0-9]+|(^|[^a-zA-Z$])/(home|Users)/|[A-Za-z]:\\\\' \
+        | sed "s|^|$path:|" || true)
+  [ -n "$hit" ] && leaks="$leaks$hit
+"
+done < <(git diff --cached --name-only --diff-filter=ACM -z \
+         | tr '\0' '\n' | grep -E '^(skills|templates)/' || true)
+
+if [ -n "${leaks//[[:space:]]/}" ]; then
+  echo "pre-commit: product-specific or machine-specific strings in staged Layer 1 content:"
+  printf '%s' "$leaks"
+  echo "Move them to PROFILE.md (product facts) or use a placeholder."
+  exit 1
+fi

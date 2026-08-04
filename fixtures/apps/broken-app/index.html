@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Portfolio Reconciliation Console</title>
+<style>
+  :root { --ink:#1c1c1e; --muted:#8a8a8f; --line:#e2e2e6; --accent:#2b5cd9; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 -apple-system,Segoe UI,Roboto,sans-serif;
+         color:var(--ink); background:#fff; }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); }
+  h1 { font-size:19px; margin:0; }
+  main { padding:20px; }
+  h2 { font-size:19px; margin:26px 0 6px; }
+  .cards { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:8px; }
+  .card { border:1px solid var(--line); border-radius:6px; padding:14px 16px;
+          min-width:190px; flex:1; }
+  .card .k { color:var(--muted); font-size:12px; text-transform:uppercase;
+             letter-spacing:.04em; }
+  .card .v { font-size:26px; font-weight:600; margin-top:4px; }
+  table { border-collapse:collapse; width:100%; margin-top:6px; }
+  th, td { border-bottom:1px solid var(--line); padding:5px 8px; text-align:left;
+           font-size:14px; white-space:nowrap; }
+  th { color:var(--muted); font-weight:600; }
+
+  th:nth-child(1), td:nth-child(1) { width:44%; }
+  th:nth-child(4), td:nth-child(4) { max-width:90px; overflow:hidden;
+                                     text-overflow:ellipsis; }
+  button { font:inherit; }
+  .primary { background:var(--accent); color:#fff; border:1px solid var(--accent);
+             border-radius:5px; padding:7px 14px; }
+  .iconbtn { background:none; border:none; padding:1px 3px; cursor:pointer;
+             font-size:15px; }
+  .quiet { background:none; border:none; color:var(--accent); text-decoration:underline;
+           padding:0; cursor:pointer; font-size:13px; }
+  :focus { outline:none; }
+  .hint { color:#b6b6bb; font-size:12px; }
+  .toast { position:fixed; right:16px; bottom:16px; background:#1c1c1e; color:#fff;
+           padding:9px 14px; border-radius:5px; display:none; }
+  dialog { border:1px solid var(--line); border-radius:8px; padding:18px;
+           max-width:340px; }
+  .drawerless { display:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Portfolio Reconciliation Console</h1>
+</header>
+
+<main>
+
+  <h2>RECON_BATCH_SUMMARY</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="k">Match rate</div>
+      <div class="v">73.4%</div>
+      <div class="hint">across sampled positions</div>
+    </div>
+    <div class="card">
+      <div class="k">Unmatched value</div>
+      <div class="v">1234.5</div>
+    </div>
+    <div class="card">
+      <div class="k">Positions reviewed</div>
+      <div class="v">0</div>
+    </div>
+    <div class="card">
+      <div class="k">Last run</div>
+      <div class="v">03/08/2026</div>
+    </div>
+  </div>
+
+  <h2>Positions</h2>
+  <p class="hint">Filter by status</p>
+  <select id="statusFilter">
+    <option>ALL</option>
+    <option>MATCHED</option>
+    <option>UNMATCHED_PENDING_REVIEW</option>
+  </select>
+  <button class="primary" id="applyBtn">Apply</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Instrument</th>
+        <th>Status</th>
+        <th>Quantity</th>
+        <th>Custodian reference</th>
+        <th>Version</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>ACME</td>
+        <td>UNMATCHED_PENDING_REVIEW</td>
+        <td>1200</td>
+        <td>CUST-NORTHBRIDGE-SETTLEMENT-0001</td>
+        <td>v10</td>
+        <td><button class="iconbtn" onclick="openDetail()">&#9432;</button>
+            <button class="iconbtn" onclick="removeRow(this)">&#128465;</button></td>
+      </tr>
+      <tr>
+        <td>BRIDGEWORKS PLC</td>
+        <td>MATCHED</td>
+        <td>0</td>
+        <td>CUST-NORTHBRIDGE-SETTLEMENT-0002</td>
+        <td>v9</td>
+        <td><button class="iconbtn" onclick="openDetail()">&#9432;</button>
+            <button class="iconbtn" onclick="removeRow(this)">&#128465;</button></td>
+      </tr>
+      <tr>
+        <td>CALDER GROUP</td>
+        <td>a7f3c9e2-51bd-4c8a-9f10-6d2e4b7c8a91</td>
+        <td>340</td>
+        <td>CUST-NORTHBRIDGE-SETTLEMENT-0003</td>
+        <td>v2</td>
+        <td><button class="iconbtn" onclick="openDetail()">&#9432;</button>
+            <button class="iconbtn" onclick="removeRow(this)">&#128465;</button></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:14px">
+    <button class="primary" id="exportBtn">Export reconciliation</button>
+    <button class="quiet" onclick="purgeAll()">Purge all positions</button>
+  </p>
+
+  <h2>Notes</h2>
+  <p style="max-width:none">Reconciliation compares custodian records against
+  internal positions for the selected batch window. Where a custodian record
+  cannot be located the position is retained in its previous state until the
+  next scheduled batch, after which it is either matched, escalated to the
+  operations queue, or written off in accordance with the tolerance thresholds
+  configured for the relevant instrument class and settlement venue, which are
+  themselves derived from the desk-level policy in force at the time the batch
+  was initiated rather than at the time of review.</p>
+</main>
+
+<dialog id="detail">
+  <h3 style="margin-top:0">Position detail</h3>
+  <p>Reference: CUST-NORTHBRIDGE-SETTLEMENT-0001</p>
+  <p>Adjust the quantity to match the custodian record.</p>
+  <label>Quantity <input id="qty" type="text" inputmode="text"></label>
+  <p><button class="primary" onclick="saveDetail()">Save</button></p>
+</dialog>
+
+<div class="toast" id="toast">Export complete</div>
+
+<script>
+
+  fetch('/api/reconciliation/telemetry')
+    .then(r => { if (!r.ok) throw new Error('telemetry ' + r.status); })
+    .catch(e => console.error('reconciliation telemetry unavailable:', e.message));
+
+  function openDetail() { document.getElementById('detail').showModal(); }
+
+  function saveDetail() {
+
+    document.getElementById('detail').close();
+    var t = document.getElementById('toast');
+    t.textContent = 'Position updated';
+    t.style.display = 'block';
+    setTimeout(function () { t.style.display = 'none'; }, 1200);
+    document.getElementById('qty').value = '';
+  }
+
+  function removeRow(btn) {
+
+    var tr = btn.closest('tr');
+    tr.parentNode.removeChild(tr);
+  }
+
+  function purgeAll() {
+    var t = document.getElementById('toast');
+    t.textContent = 'Purge queued';
+    t.style.display = 'block';
+    setTimeout(function () { t.style.display = 'none'; }, 900);
+  }
+
+  document.getElementById('applyBtn').addEventListener('click', function () {});
+
+  document.getElementById('exportBtn').addEventListener('click', function () {
+    var t = document.getElementById('toast');
+    t.textContent = 'Export complete';
+    t.style.display = 'block';
+    setTimeout(function () { t.style.display = 'none'; }, 1000);
+  });
+</script>
+</body>
+</html>

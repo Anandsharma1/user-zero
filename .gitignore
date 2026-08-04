@@ -1,0 +1,10 @@
+# Ephemeral run evidence — never committed. Durable outcomes live in the
+# verdict lane's dispositions, pinned regression tests, and the RCA ledger.
+qa-output/
+
+# Stack runner scratch state (teardown deletes these; never point it at qa-output/)
+.qa-stack/
+
+node_modules/
+.DS_Store
+*.log
