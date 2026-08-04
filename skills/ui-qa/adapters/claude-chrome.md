@@ -106,7 +106,13 @@ with a full state clear between them.
 
 ## First-use checklist (do once per extension version, record results here)
 
-Run against the shipped fixtures (`fixtures/serve.sh`) so answers are checkable:
+This probes the **adapter**, not any product — it is product-independent and its
+results hold for every repo the harness is installed into. Run it **in the
+harness repo** (fixtures are not installed into products) against the shipped
+fixture apps (`fixtures/serve.sh`), so every answer is checkable. It is not a
+calibration and needs no blindness: the one control it references (KD-C01) is
+already disclosed in the fixtures' own profile. Just don't read
+`fixtures/controls.tsv` in a session that might later run a fixture calibration.
 
 - [ ] List the browser tools the session actually exposes; record their names
       and the extension version.
