@@ -52,12 +52,39 @@ evidence with other tabs' noise, and points any mutation at real accounts.
 **Required mitigation — a dedicated QA Chrome profile:**
 
 1. Create a Chrome profile used for nothing else (Chrome → profile switcher →
-   Add). No logins, no extensions beyond Claude's, no browsing.
+   Add, skip sign-in, name it e.g. `user-zero QA`). No logins, no extensions
+   beyond Claude's, no browsing.
 2. Run all glance/charter work in that profile only.
 3. Between runs, clear its site data (Settings → Privacy → Clear browsing
    data → all time), or delete and recreate the profile.
 4. Record in the run's debrief: `browser: claude-chrome, dedicated profile,
    state cleared at <time>`.
+
+### How the profile is actually selected (you do not pass an identifier)
+
+There is no profile parameter to hand the agent. Profile selection happens
+before the agent exists, through two properties of Chrome itself:
+
+- **Extensions are installed per profile.** An extension in your daily profile
+  does not exist in the QA profile, and vice versa. So the single most
+  effective control is: **install the Claude extension ONLY in the QA
+  profile** (or remove/disable it in your daily one). Then pairing *cannot*
+  land anywhere else — the default behavior you observed, where Chrome opens
+  with the last-used profile and the extension "takes" it, becomes harmless
+  because that profile has no extension to take.
+- **A window belongs to a profile.** Launch the QA profile deliberately: pick
+  it from Chrome's profile switcher, or start it directly —
+  `google-chrome --profile-directory="Profile 2"` (find the directory name at
+  `chrome://version` → Profile Path, under the QA profile).
+
+Then pair Claude Code with that running window. Two hygiene rules and a check:
+
+- Close your daily-profile Chrome windows while pairing, so there is no
+  ambiguity about which instance the session connects to.
+- **Verify before the first action, every session**: have the agent open a
+  site you are normally logged into (your mail, GitHub). In the QA profile it
+  must arrive logged out, with no autofill. Logged-in = wrong profile = stop.
+  Record the check's screenshot as the run's first evidence item.
 
 This makes isolation **operator-provided instead of tool-enforced**. That is a
 real downgrade — a checklist someone can skip is weaker than a flag that cannot
@@ -114,6 +141,8 @@ calibration and needs no blindness: the one control it references (KD-C01) is
 already disclosed in the fixtures' own profile. Just don't read
 `fixtures/controls.tsv` in a session that might later run a fixture calibration.
 
+- [ ] Which profile is paired? Open a normally-logged-in site — it must arrive
+      logged out. Screenshot it.
 - [ ] List the browser tools the session actually exposes; record their names
       and the extension version.
 - [ ] Capability 2: can it return a structured element tree, or only vision?
