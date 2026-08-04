@@ -9,9 +9,11 @@ Chromium.
 **Measured on 2026-08-04 against extension version 1.0.84** — the first-use
 checklist at the bottom was run end to end against the shipped fixtures, and
 every row below now carries a result instead of a guess. Read those results
-before trusting a capability: two of them are worse than the old guesses
-(network gives metadata only, and `resize_window` reports success while doing
-nothing), and one is better (a structured accessibility tree does exist).
+before trusting a capability: one is worse than the old guess (network gives
+metadata only), one is better (a structured accessibility tree does exist), and
+one is conditional in a way no guess would have caught — resizing works, but
+only on an unmaximized window, and it clamps at a viewport far wider than a
+phone.
 
 The extension auto-updates and its tool surface varies by version, so this
 measurement is pinned to 1.0.84. On any other version the rows revert to
@@ -61,7 +63,10 @@ evidence with other tabs' noise, and points any mutation at real accounts.
 2. Run all glance/charter work in that profile only.
 3. Between runs, clear its site data (Settings → Privacy → Clear browsing
    data → all time), or delete and recreate the profile.
-4. Record in the run's debrief: `browser: claude-chrome, dedicated profile,
+4. **Leave the window unmaximized.** Measured on 1.0.84: `resize_window` is
+   silently inert on a maximized window while still reporting success, so a
+   maximized QA window costs you viewport control without telling you.
+5. Record in the run's debrief: `browser: claude-chrome, dedicated profile,
    state cleared at <time>`.
 
 ### How the profile is actually selected (you do not pass an identifier)
@@ -114,10 +119,10 @@ for the evidence behind each row.
 |---|---|---|
 | 1. Navigate & interact | **yes — real input** | `navigate` + `computer`. Clicks and keystrokes arrive as `isTrusted: true` browser-level input, not synthetic JS events, so handler behavior is genuine |
 | 2. Accessibility tree | **yes, but lossy** | `read_page` returns a role+name tree with `ref` ids; `find` maps natural language to refs. But table rows/cells/headers all flatten to `generic`, and headings carry no level — row/column and heading-hierarchy claims must come from the screenshot, not the tree |
-| 3. Screenshots | yes, downscaled | its primary sense. A 1920×941 viewport returns a 1568×768 JPEG (~0.82); use `zoom` before judging small-text legibility |
+| 3. Screenshots | yes, downscaled above ~1568 px | its primary sense. A 1920×941 viewport returns a 1568×768 JPEG (~0.82); a 500×663 viewport returns 1:1. Use `zoom` before judging small-text legibility on a wide window |
 | 4. Console access | **yes, per-domain accumulating** | catches load-time errors with file:line. The buffer is per-tab and per-**domain**, not per-page: it keeps another page's errors after you navigate. Always `clear: true` on arrival, and check each message's source URL |
 | 5. Network access | **partial — metadata only** | url + method + statusCode. **No headers, no request/response bodies, no timing.** Enough to prove a request failed; never enough for payload evidence, so correctness questions needing response contents stay `needs_oracle` |
-| 6. Viewport control | **no — and it lies** | `resize_window` returns "Successfully resized … to 390x844" while the viewport does not change and the page does not reflow. Mobile-viewport rows are `blocked: adapter cannot resize`. Never trust the success string; assert `innerWidth` |
+| 6. Viewport control | **conditional — and it lies when it fails** | Works only on an **unmaximized** window; on a maximized one it returns success and does nothing. Sets **outer** size, not viewport, and clamps at ~532 outer / **500 viewport** px wide, so a 390 px phone viewport is unreachable. Phone-width rows are `blocked: adapter clamps at 500px`. Never trust the success string; assert `innerWidth` |
 | 7. Isolated state | **operator-provided** | dedicated profile + state clearing, above. Measured: no adapter tool clears profile state, and a brand-new tab is **not** new state |
 
 Recon pattern is unchanged: wait for settle, look, identify targets from what
@@ -269,23 +274,46 @@ Same buffer semantics as console: per-tab, arms on first call (so a reload is
 needed to catch page-load requests), accumulates across pages within the
 origin, `clear: true` works.
 
-**5. Capability 6, viewport — FAIL, and it fails dishonestly.**
-`resize_window` to 390×844 returned `Successfully resized window containing tab
-… to 390x844 pixels`. Nothing changed: `innerWidth` 1920, `innerHeight` 941,
-`outerWidth` 1920, `outerHeight` 1080, `document.documentElement.scrollWidth`
-1920, and the page did not reflow. Repeated at 800×600 — same success string,
+**5. Capability 6, viewport — CONDITIONAL. Window state decides it, and the
+failure is silent.**
+
+*Maximized window (first pass).* `resize_window` to 390×844 returned
+`Successfully resized window containing tab … to 390x844 pixels` and nothing
+changed: `innerWidth` 1920, `innerHeight` 941, `outerWidth` 1920, `outerHeight`
+1080, `scrollWidth` 1920, no reflow. Repeated at 800×600 — same success string,
 same unchanged 1920×941. **A reported success with no effect is worse than a
 missing capability**, because it will be believed.
 
-Likely cause, *hypothesis not measurement*: the window is maximized
-(`outerWidth × outerHeight` == screen `1920×1080`), and Chrome ignores bounds
-changes on a maximized window unless its state is first set to normal. Nothing
-in the tool surface sets window state, and `wmctrl`/`xdotool` were unavailable
-to confirm the maximized state externally.
+*Unmaximized window (second pass, same tool, same version).* The window was
+restored down by hand (baseline `outerWidth` 1749, `outerHeight` 990) and
+resizing then worked, with two limits:
 
-Working rule until re-measured on an unmaximized window: mobile-viewport rows
-are `blocked: adapter cannot resize`, never silently skipped — and never trust
-the return string. Assert `innerWidth` after any resize.
+| Requested | Resulting outer | Resulting viewport |
+|---|---|---|
+| 390 × 844 | 532 × 844 | **500 × 663** |
+| 300 × 800 | 532 × 800 | **500 × 619** |
+| 768 × 844 | 768 × 844 | 736 × 663 |
+
+- **It sets the outer window, not the viewport.** Chrome's frame costs 32 px of
+  width and ~181 px of height, so a target viewport needs those added back.
+- **Width clamps at ~532 outer / 500 viewport.** 390 and 300 both landed on the
+  same 500 px viewport, so this is a floor, not a rounding. Height is honored
+  exactly. **A 390 px phone viewport is therefore unreachable through this
+  adapter** — the narrowest honest viewport is 500 px.
+
+The page did genuinely reflow at 500 px (the fixture's three summary cards
+restacked to 2 + 1), so what the capability delivers is real responsive
+rendering, just not phone width. Screenshots at that size come back 1:1
+(500×663), so the ~0.82 downscale noted below is a large-viewport cap rather
+than a constant.
+
+So the maximized-window failure is now measurement, not hypothesis: same tool
+and version, inert when maximized, working when not.
+
+Working rules: **unmaximize the QA window before any run that judges layout**;
+treat phone-width rows as `blocked: adapter clamps at 500px`, never silently
+skipped; add Chrome's 32/181 px frame to any target viewport; and never trust
+the return string — assert `innerWidth` after every resize.
 
 **6. Isolation — confirmed operator-provided, with no tool-side help.**
 The origin arrived cold (`Object.keys(localStorage)` empty before the probe).
@@ -305,6 +333,10 @@ clearing between runs stays a manual Chrome-Settings step, as required above.
   correct scaling of the ~0.82 downscale. Coordinates are screenshot-space and
   are mapped for you; interaction fidelity is genuinely higher than dispatching
   synthetic events.
+- **Screenshot scale is not constant.** 1:1 at a 500 px viewport, ~0.82 at
+  1920 px — the JPEG appears capped near 1568 px wide. Do not assume a fixed
+  factor when converting between screenshot and page coordinates; the tool maps
+  clicks for you, so prefer refs or screenshot-space coordinates over arithmetic.
 - **The server access log is not an oracle for navigation.** Reloads and
   same-URL clicks were served from Chrome's cache with no server hit, so an
   absent log line does not mean a click failed to navigate. Verify navigation
