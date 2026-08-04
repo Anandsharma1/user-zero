@@ -59,11 +59,21 @@ CANON="$ROOT/$BASE"
 # --- stays true of the generated stubs too, not only of the prose.
 case "$ADAPTER" in
   playwright-mcp) AGENT_TOOLS="Read, Write, mcp__playwright"; MCP_ID="playwright" ;;
-  # The Chrome extension's tool names vary by version and cannot be pinned here.
-  # An empty grant means the stub OMITS its tools line and inherits the
-  # session's tools -- broader than we like; the adapter's first-use checklist
-  # says to tighten it once the real names are recorded.
-  claude-chrome)  AGENT_TOOLS=""; MCP_ID="" ;;
+  # Pinned from the first-use checklist run on extension 1.0.84 (2026-08-04);
+  # see adapters/claude-chrome.md. Named explicitly rather than inherited, so a
+  # renamed tool in a later extension version fails visibly instead of the stub
+  # silently absorbing whatever the session happens to expose.
+  #
+  # javascript_tool is deliberately absent: it works, but it would hand the
+  # explorer the DOM and page internals, which the persona's hard rules forbid.
+  # file_upload, upload_image, gif_creator and shortcuts_* are outside the
+  # browser-driver contract.
+  claude-chrome)  AGENT_TOOLS="Read, Write$(printf ', mcp__claude-in-chrome__%s' \
+                    tabs_context_mcp tabs_create_mcp tabs_close_mcp navigate \
+                    computer read_page find get_page_text form_input \
+                    read_console_messages read_network_requests resize_window \
+                    browser_batch list_connected_browsers select_browser \
+                    switch_browser)"; MCP_ID="claude-in-chrome" ;;
   *)              AGENT_TOOLS="Read, Write"; MCP_ID="" ;;
 esac
 

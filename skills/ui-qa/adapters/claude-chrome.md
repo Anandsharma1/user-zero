@@ -6,12 +6,16 @@ Chromium.
 
 ## Honest status
 
-This adapter is **capability-declared, not capability-measured**. The extension
-auto-updates and its tool surface varies by version, so unlike the Playwright
-adapter — whose console-buffer and network behaviors were probed on a pinned
-version and recorded — nothing here carries a measurement. Per repo policy
-(version-less measurements are guesses), every unverified row below says so,
-and the first-use checklist at the bottom is how it stops being unverified.
+**Measured on 2026-08-04 against extension version 1.0.84** — the first-use
+checklist at the bottom was run end to end against the shipped fixtures, and
+every row below now carries a result instead of a guess. Read those results
+before trusting a capability: two of them are worse than the old guesses
+(network gives metadata only, and `resize_window` reports success while doing
+nothing), and one is better (a structured accessibility tree does exist).
+
+The extension auto-updates and its tool surface varies by version, so this
+measurement is pinned to 1.0.84. On any other version the rows revert to
+unverified until the checklist is re-run.
 
 ## When this adapter is the right choice
 
@@ -77,6 +81,15 @@ before the agent exists, through two properties of Chrome itself:
   `google-chrome --profile-directory="Profile 2"` (find the directory name at
   `chrome://version` → Profile Path, under the QA profile).
 
+Measured on 1.0.84: the tool that lists paired browsers reports only a device
+id, a display name, an OS and a connection time — **no profile name, no profile
+path**. So the display name is the only handle you get, and it is worth
+setting: pairing via `switch_browser` broadcasts a prompt to every profile that
+has the extension and lets you *name* the window you accept it in. Name the QA
+one (e.g. `user-zero QA`) once and later sessions can at least ask for it by
+name. Declining the prompt in the other profiles works but is per-request; it
+does not persist, and it does not unpair an already-connected browser.
+
 Then pair Claude Code with that running window. Two hygiene rules and a check:
 
 - Close your daily-profile Chrome windows while pairing, so there is no
@@ -94,15 +107,18 @@ real data".
 
 ## Capability mapping
 
+Status column is as measured on 1.0.84 (2026-08-04); see the checklist results
+for the evidence behind each row.
+
 | Contract capability | Status | Notes |
 |---|---|---|
-| 1. Navigate & interact | expected | click/type/navigate are the extension's core |
-| 2. Accessibility tree | **verify** | the extension is vision-first; whether a structured role+name snapshot is exposed varies. If unavailable, the explorer navigates visually and says so — element-reachability claims weaken |
-| 3. Screenshots | yes | its primary sense |
-| 4. Console access | **verify** | if unavailable, console-error findings are out of reach for this adapter — declare it in every report |
-| 5. Network access | **verify — assume unavailable** | without it there is no cross-layer payload evidence; correctness questions become `needs_oracle` even in charter mode |
-| 6. Viewport control | **verify** | a real window may not resize to declared viewports; if not, mobile-viewport rows are `blocked: adapter cannot resize`, never silently skipped |
-| 7. Isolated state | **operator-provided** | dedicated profile + state clearing, above |
+| 1. Navigate & interact | **yes — real input** | `navigate` + `computer`. Clicks and keystrokes arrive as `isTrusted: true` browser-level input, not synthetic JS events, so handler behavior is genuine |
+| 2. Accessibility tree | **yes, but lossy** | `read_page` returns a role+name tree with `ref` ids; `find` maps natural language to refs. But table rows/cells/headers all flatten to `generic`, and headings carry no level — row/column and heading-hierarchy claims must come from the screenshot, not the tree |
+| 3. Screenshots | yes, downscaled | its primary sense. A 1920×941 viewport returns a 1568×768 JPEG (~0.82); use `zoom` before judging small-text legibility |
+| 4. Console access | **yes, per-domain accumulating** | catches load-time errors with file:line. The buffer is per-tab and per-**domain**, not per-page: it keeps another page's errors after you navigate. Always `clear: true` on arrival, and check each message's source URL |
+| 5. Network access | **partial — metadata only** | url + method + statusCode. **No headers, no request/response bodies, no timing.** Enough to prove a request failed; never enough for payload evidence, so correctness questions needing response contents stay `needs_oracle` |
+| 6. Viewport control | **no — and it lies** | `resize_window` returns "Successfully resized … to 390x844" while the viewport does not change and the page does not reflow. Mobile-viewport rows are `blocked: adapter cannot resize`. Never trust the success string; assert `innerWidth` |
+| 7. Isolated state | **operator-provided** | dedicated profile + state clearing, above. Measured: no adapter tool clears profile state, and a brand-new tab is **not** new state |
 
 Recon pattern is unchanged: wait for settle, look, identify targets from what
 actually rendered, act; on a blocked interaction, re-look and re-orient — never
@@ -120,10 +136,19 @@ deliberately does not transcribe them. What matters for the harness:
 3. Complete the first-use checklist below before the first run you intend to
    keep.
 
-Note on tool grants: the generated `user-zero` agent stub cannot pin this
-adapter's tool names (they vary by extension version), so under
-`--adapter claude-chrome` the stub inherits the session's tools instead of
-naming them. Tighten it after the checklist records the real names.
+Note on tool grants: the stub now **pins** the tool names measured on 1.0.84
+rather than inheriting the session's tools. Two consequences worth knowing:
+
+- If the extension renames a tool in a later version, the stub loses that
+  capability *visibly* (the tool is absent) rather than silently inheriting a
+  changed surface. Re-run the checklist and re-generate on a version bump.
+- `javascript_tool` is deliberately **excluded** from the grant. It exists and
+  works, and this checklist used it for probing — but handing it to the
+  explorer would hand it the DOM and page internals, which the persona's hard
+  rules forbid ("you report what you observed, not what you infer the code
+  does"). Adapter probing is not an explorer run; keep the capability out of
+  the explorer's hands. `file_upload`, `upload_image`, `gif_creator` and
+  `shortcuts_*` are excluded as outside the contract.
 
 ## Concurrency
 
@@ -141,20 +166,151 @@ calibration and needs no blindness: the one control it references (KD-C01) is
 already disclosed in the fixtures' own profile. Just don't read
 `fixtures/controls.tsv` in a session that might later run a fixture calibration.
 
-- [ ] Which profile is paired? Open a normally-logged-in site — it must arrive
+- [x] Which profile is paired? Open a normally-logged-in site — it must arrive
       logged out. Screenshot it.
-- [ ] List the browser tools the session actually exposes; record their names
+- [x] List the browser tools the session actually exposes; record their names
       and the extension version.
-- [ ] Capability 2: can it return a structured element tree, or only vision?
-- [ ] Capability 4: open `broken-app/index.html` — control KD-C01 logs a console
+- [x] Capability 2: can it return a structured element tree, or only vision?
+- [x] Capability 4: open `broken-app/index.html` — control KD-C01 logs a console
       error on load. Can the adapter surface it? If yes, is the buffer scoped to
       this page or does it accumulate?
-- [ ] Capability 5: can it show the failed telemetry request at all?
-- [ ] Capability 6: can it set 390×844? Does the page actually reflow?
-- [ ] Isolation: after clearing site data, does a revisited page arrive truly
+- [x] Capability 5: can it show the failed telemetry request at all?
+- [x] Capability 6: can it set 390×844? Does the page actually reflow?
+- [x] Isolation: after clearing site data, does a revisited page arrive truly
       cold (no cookies, no localStorage)?
-- [ ] Record everything above in this file with the date and version, and
+- [x] Record everything above in this file with the date and version, and
       update the generated stub's tool grant via the generator.
 
-Until this checklist is filled in, every run through this adapter should say
-so: `adapter: claude-chrome (capabilities unverified)`.
+## Checklist results — 2026-08-04, extension 1.0.84
+
+Environment: Chrome on Linux (X11/GNOME), screen 1920×1080, `devicePixelRatio`
+1, viewport 1920×941. Extension id `fcoeoabgfenejglbffodgkkbkcdhcgfn`,
+version 1.0.84 (read from the on-disk manifest — the tool surface does not
+report its own version). Fixtures served at `http://127.0.0.1:8801` by
+`fixtures/serve.sh`. `controls.tsv` was not read.
+
+**Tool surface (22 tools, all `mcp__claude-in-chrome__*`).** `browser_batch`,
+`computer`, `file_upload`, `find`, `form_input`, `get_page_text`,
+`gif_creator`, `javascript_tool`, `list_connected_browsers`, `navigate`,
+`read_console_messages`, `read_network_requests`, `read_page`, `resize_window`,
+`select_browser`, `shortcuts_execute`, `shortcuts_list`, `switch_browser`,
+`tabs_close_mcp`, `tabs_context_mcp`, `tabs_create_mcp`, `upload_image`.
+
+**1. Which profile is paired — PASS, with a caveat that weakens the mitigation.**
+Two browsers were connected. `list_connected_browsers` reports only `deviceId`,
+`name`, `osPlatform`, `connectedAt`, `isLocal` — **no profile name and no
+profile path**, so the paired profile cannot be identified from the tool
+surface at all. Selected `f7e7dcbe-9573-4871-b9b3-7da22a946091` ("Browser 1")
+and loaded `github.com`: it arrived signed out ("Sign in" / "Sign up"), no
+autofill. That is the QA profile.
+
+Two things this exposed:
+
+- Screenshots are **viewport-only**, so Chrome's profile avatar is not in the
+  frame. The logged-out check is not merely the recommended identification —
+  it is the *only* in-band one.
+- On this machine the Claude extension is installed in **three** profiles
+  (`Profile 1`, `Profile 2`, `Profile 8`). The "install it only in the QA
+  profile" mitigation above is therefore **not currently satisfied**, and
+  pairing can land in a daily profile. Naming a browser via `switch_browser`
+  makes it recognizable in later sessions; removing the extension from the
+  non-QA profiles is the actual fix.
+
+**2. Capability 2, structured tree — PASS, better than the old guess.**
+`read_page` is a genuine role+name accessibility tree with stable `ref` ids,
+`href` values, `filter=interactive|all`, `depth`/`max_chars`, and a trailing
+`Viewport: WxH`. `find` resolves natural language ("Batches navigation tab") to
+a single ref. The vision-first framing above understated this: role+name
+navigation is available here, not just pixels.
+
+Two real limits:
+
+- **The tree is lossy on structure.** Every row, cell and column header of the
+  fixture table came back as a flat run of `generic` nodes under `table`, and
+  headings arrive as `heading` with no level. "This value sits under the wrong
+  column" and "the heading order skips a level" cannot be sourced from this
+  tree — read them off the screenshot.
+- **The extension's own UI is in the tree**: `"Claude is active in this tab
+  group"`, `Open chat`, `Dismiss`. That is adapter chrome, not product UI, and
+  must never become a finding.
+
+**3. Capability 4, console — PASS, and the scoping answer matters.**
+KD-C01's load-time error surfaced immediately, with source and position:
+`[ERROR] (…/broken-app/index.html:153:24) reconciliation telemetry
+unavailable: telemetry 404`.
+
+Buffer semantics, measured:
+
+- **Per-tab, and per-domain — not per-page.** After navigating to
+  `clean-app/index.html`, the buffer still returned both `broken-app` errors.
+  Since both fixture apps share one origin, an evaluator reading the console
+  while standing on the **positive control** would see the broken app's error.
+  That is a false-positive generator; the class of mistake calibration exists
+  to catch.
+- **It accumulates across reloads** — one entry per load, two after two loads.
+- `clear: true` returns the messages and empties the buffer (verified: the next
+  read was empty).
+- **Tracking arms on first call per tab.** Messages logged before the first
+  `read_console_messages` on that tab are lost, so load-time errors need a
+  reload after arming.
+
+Working rule: `clear: true` on every arrival, and check each message's source
+URL before attributing it to the page you are on.
+
+**4. Capability 5, network — PARTIAL. Better than "assume unavailable", worse
+than useful for payload evidence.** After a reload the failed telemetry request
+was visible: `GET http://127.0.0.1:8801/api/reconciliation/telemetry` →
+`404`. But the tool returns **only url, method and statusCode** — no headers,
+no request or response bodies, no timing. So it proves *that* a request failed
+and can substantiate a console-error finding; it can never substantiate a
+claim about *what a response contained*. Correctness questions needing payload
+proof remain `needs_oracle` through this adapter, exactly as the table says.
+Same buffer semantics as console: per-tab, arms on first call (so a reload is
+needed to catch page-load requests), accumulates across pages within the
+origin, `clear: true` works.
+
+**5. Capability 6, viewport — FAIL, and it fails dishonestly.**
+`resize_window` to 390×844 returned `Successfully resized window containing tab
+… to 390x844 pixels`. Nothing changed: `innerWidth` 1920, `innerHeight` 941,
+`outerWidth` 1920, `outerHeight` 1080, `document.documentElement.scrollWidth`
+1920, and the page did not reflow. Repeated at 800×600 — same success string,
+same unchanged 1920×941. **A reported success with no effect is worse than a
+missing capability**, because it will be believed.
+
+Likely cause, *hypothesis not measurement*: the window is maximized
+(`outerWidth × outerHeight` == screen `1920×1080`), and Chrome ignores bounds
+changes on a maximized window unless its state is first set to normal. Nothing
+in the tool surface sets window state, and `wmctrl`/`xdotool` were unavailable
+to confirm the maximized state externally.
+
+Working rule until re-measured on an unmaximized window: mobile-viewport rows
+are `blocked: adapter cannot resize`, never silently skipped — and never trust
+the return string. Assert `innerWidth` after any resize.
+
+**6. Isolation — confirmed operator-provided, with no tool-side help.**
+The origin arrived cold (`Object.keys(localStorage)` empty before the probe).
+Set `localStorage.uz_probe` plus a `uz_probe` cookie, then opened a **brand-new
+tab** via `tabs_create_mcp` on the same URL: both came back intact. **A new tab
+is not new state.** No tool in the surface clears profile state. The only
+in-session clear is page-scoped JS (`localStorage.clear()` plus cookie
+expiry — verified effective for that origin), which does not touch other
+origins, HttpOnly cookies, IndexedDB, service workers, or the HTTP cache. So
+clearing between runs stays a manual Chrome-Settings step, as required above.
+
+### Two further measurements worth carrying
+
+- **Input is real.** A capture-phase listener recorded `isTrusted: true` for
+  the click and for all 18 keystrokes of a typed string, and a click issued at
+  screenshot coordinates (1463, 19) landed at page coordinates (1791, 23) —
+  correct scaling of the ~0.82 downscale. Coordinates are screenshot-space and
+  are mapped for you; interaction fidelity is genuinely higher than dispatching
+  synthetic events.
+- **The server access log is not an oracle for navigation.** Reloads and
+  same-URL clicks were served from Chrome's cache with no server hit, so an
+  absent log line does not mean a click failed to navigate. Verify navigation
+  from the page itself, not from the fixture server's log.
+
+Runs on extension 1.0.84 may state `adapter: claude-chrome (capabilities
+measured 2026-08-04, v1.0.84)`. On any other version, revert to
+`adapter: claude-chrome (capabilities unverified)` until this checklist is
+re-run.

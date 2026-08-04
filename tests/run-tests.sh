@@ -197,12 +197,15 @@ t_adapter_claude_chrome() {
   [ -f "$stub" ] || { no "claude-chrome adapter" "agent stub not generated"; return; }
   if grep -q 'mcp__playwright' "$stub"; then
     no "claude-chrome adapter" "stub still grants playwright tools"
-  elif grep -q '^tools:' "$stub"; then
-    no "claude-chrome adapter" "stub pins a tools line for an adapter whose tool names vary"
+  elif ! grep -q '^tools:.*mcp__claude-in-chrome__computer' "$stub"; then
+    no "claude-chrome adapter" "stub does not pin the measured extension tool names"
+  elif grep -q 'mcp__claude-in-chrome__javascript_tool' "$stub"; then
+    # Granting it would hand the explorer the DOM, which the persona forbids.
+    no "claude-chrome adapter" "stub grants javascript_tool to the explorer"
   elif ! grep -q 'adapters/claude-chrome.md' "$stub"; then
     no "claude-chrome adapter" "stub does not point at the claude-chrome adapter file"
   else
-    ok "claude-chrome adapter: stub inherits session tools and points at the right adapter"
+    ok "claude-chrome adapter: stub pins measured tools, withholds JS, points at the right adapter"
   fi
 }
 
