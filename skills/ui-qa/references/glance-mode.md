@@ -9,8 +9,8 @@ is wrong. Glance mode is that, and it exists as its own mode so its output can b
 honest about what it did — instead of a charter run with checks quietly skipped.
 
 ```
-/ui-qa glance <route|url> [--persona "one sentence"] [--lenses a,b]
-                          [--viewports desktop,mobile]
+/ui-qa glance <route|url> [--adapter <name>] [--persona "one sentence"]
+                          [--lenses a,b] [--viewports desktop,mobile]
 ```
 
 ## What it needs
@@ -20,7 +20,7 @@ Almost nothing:
 | Needed | Notes |
 |---|---|
 | A URL the app is serving | that is the whole setup |
-| The browser adapter loaded | same as any run. This is also where the Claude-in-Chrome adapter fits best — real-Chrome rendering for an opinions-grade look (`adapters/claude-chrome.md`, dedicated QA profile required) |
+| The browser adapter loaded | same as any run — see §Which adapter drives it, below |
 | A persona sentence | optional; defaults to "a capable first-time user of this kind of product" |
 
 **No `PROFILE.md` required.** If one exists, glance borrows from it — but it
@@ -41,6 +41,28 @@ authorize. What it borrows, in increasing order of teeth:
 
 Findings judged against §6 say so (`principle: PROFILE §6 — date format`), so a
 reader can tell industry judgement from your own house rules.
+
+## Which adapter drives it
+
+Adapter selection is a **binding, not a discovery**: several browser toolsets
+being connected in a session does not make any of them the adapter. Precedence:
+
+1. **`--adapter <name>` on the glance itself** — the override. `--adapter
+   claude-chrome` reads `adapters/claude-chrome.md` and drives through the
+   extension; this is the intended way to get a real-Chrome look at a screen
+   in a repo whose profile binds Playwright.
+2. **The profile's binding** (`PROFILE.md` §10), when a profile exists. This is
+   why a glance in a profiled repo uses Playwright even with the Chrome
+   extension connected — the profile said so.
+3. **Whatever browser tools the session has**, only when there is no profile
+   and no flag.
+
+The chosen adapter's own rules ride along in full. For `claude-chrome` that
+means: the dedicated QA profile with the **logged-out gate as the run's first
+evidence item**, an unmaximized window, `clear: true` on console reads, no
+phone-width viewports (clamps at 500px — declare those rows blocked, do not
+fake them), and network metadata only. A glance may not use an adapter for a
+task the adapter's own file forbids.
 
 ## It really does use the product
 

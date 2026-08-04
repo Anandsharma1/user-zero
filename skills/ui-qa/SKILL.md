@@ -28,7 +28,7 @@ authoritative review lane.
 
 ## Invocation
 
-`/ui-qa glance <route|url> [--persona "..."] [--lenses a,b] [--viewports a,b]`
+`/ui-qa glance <route|url> [--adapter <name>] [--persona "..."] [--lenses a,b] [--viewports a,b]`
 `/ui-qa <charter-name> [<charter-name> ...] [--calibrate]`
 `/ui-qa <charter-name> --cohort <persona>[,<persona>...]`
 `/ui-qa explore <route|module|functionality> [--run]`
