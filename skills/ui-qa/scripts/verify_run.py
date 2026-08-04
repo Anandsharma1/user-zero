@@ -489,7 +489,7 @@ def check_stack_collision(run: Path, rep: Report) -> None:
 
 # ----------------------------------------------------------------------- main
 
-GLANCE_LABEL = "GLANCE — uncalibrated, Pass-A only"
+GLANCE_LABEL = "GLANCE — uncalibrated, no oracles"
 
 # Glance findings drop the three fields that have nothing to hang on in this
 # mode: priority (no triage), suppression_check (no suppression sources), and
@@ -519,6 +519,16 @@ def check_glance(run: Path, rep: Report) -> None:
     else:
         rep.fail("glance.md does not carry the mandatory label — it must begin "
                  f'with "{GLANCE_LABEL}. ..." verbatim (references/glance-mode.md)')
+
+    # A correctness question must be marked, not filed as a verdict: glance has
+    # no authority to say a value is right or wrong.
+    for rec in parse_findings(text):
+        obs = (rec.get("observed", "") + " " + rec.get("principle", "")).lower()
+        if re.search(r"\b(incorrect|wrong value|should be|miscalculat|does not match the (spec|expected))", obs) \
+           and not rec.get("needs_oracle"):
+            rep.fail(f"glance.md {rec.get('id', '<no id>')}: claims a value is "
+                     "wrong but carries no 'needs_oracle:' marker — glance has no "
+                     "authority to verify correctness (references/glance-mode.md)")
 
     if (run / "evidence").is_dir():
         rep.ok("evidence/ present")

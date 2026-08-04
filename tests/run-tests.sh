@@ -593,7 +593,7 @@ t_dest_inside_platform_dir_refused() {
 make_glance() {  # <dir> ; a minimal glance run that should PASS
   local d="$1"; mkdir -p "$d/evidence"; printf 'shot\n' > "$d/evidence/01.png"
   {
-    printf 'GLANCE — uncalibrated, Pass-A only. No functional or data verification.\n\n'
+    printf 'GLANCE — uncalibrated, no oracles. Nothing verified as correct.\n\n'
     printf -- '- id: g-01\n  class: product-defect\n  route_state: /dashboard loaded\n'
     printf -- '  persona: capable first-time user\n  screenshot: evidence/01.png\n'
     printf -- '  observed: match rate shown with no denominator\n'
@@ -633,6 +633,23 @@ t_glance_does_not_demand_full_artifacts() {
   printf '%s' "$out" | grep -qiE 'coverage-required|pass-b-report|sha256' \
     && no "glance scope" "glance gate demanded full-mode artifacts" \
     || ok "glance gate does not demand coverage, hashes or a Pass-B report"
+}
+
+t_glance_correctness_claim_needs_marker() {
+  local d="$WORK/glance-claim"; make_glance "$d"
+  sed -i 's|  observed: match rate shown with no denominator|  observed: the total is incorrect, it should be 15|' "$d/glance.md"
+  run "$GATE" "$d" --glance \
+    && no "glance authority" "a correctness verdict passed without needs_oracle" \
+    || ok "glance rejects a correctness claim with no needs_oracle marker"
+}
+
+t_glance_allows_marked_oracle_question() {
+  local d="$WORK/glance-q"; make_glance "$d"
+  sed -i 's|  observed: match rate shown with no denominator|  observed: the total should be 15 but shows 11|' "$d/glance.md"
+  printf '  needs_oracle: yes — cannot verify without the batch record\n' >> "$d/glance.md"
+  run "$GATE" "$d" --glance \
+    && ok "glance accepts a correctness question marked needs_oracle" \
+    || no "glance authority" "a properly marked open question was rejected"
 }
 
 t_glance_flag_is_exclusive() {
@@ -846,6 +863,7 @@ for t in \
   t_gate_checks_severity_vocabulary t_gate_cohort_needs_two_personas \
   t_glance_accepts_minimal_run t_glance_requires_label \
   t_glance_still_requires_finding_quality t_glance_does_not_demand_full_artifacts \
+  t_glance_correctness_claim_needs_marker t_glance_allows_marked_oracle_question \
   t_glance_flag_is_exclusive t_glance_catches_credentials \
   t_uninstall_removes_what_it_installed t_uninstall_keeps_user_work \
   t_uninstall_purge_removes_explorer t_uninstall_keeps_unowned_files \

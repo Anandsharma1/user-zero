@@ -9,7 +9,7 @@ Works with Claude Code and Codex from one shared source.
 
 > **Status: uncalibrated.** The method is finished; the proof that it works is
 > not. Nobody has run it against a real product yet, and there are no
-> calibration scores. The supporting tooling has 79 tests, but four review
+> calibration scores. The supporting tooling has 81 tests, but four review
 > rounds each found real bugs after the previous round's tests passed — so treat
 > the tests as proof about their own cases, not about the whole thing.
 > [docs/known-limitations.md](docs/known-limitations.md) lists exactly what is
@@ -70,21 +70,38 @@ Then, in Claude Code or Codex inside your repo:
 /ui-qa glance /dashboard --lenses forms-and-validation
 ```
 
-`glance` needs **nothing set up** — no profile, no charter, no calibration. It
-opens the screen, applies the same expert checklist the full mode uses, and
-tells you what is obviously wrong, with screenshots.
+`glance` needs **nothing set up** — no profile, no charter, no calibration.
 
-The trade is stated in its own output, which always starts with:
+It still *uses* the product: walks journeys end to end, clicks things and checks
+they do what they say, tests Back/refresh/deep links, watches the console, and
+checks the data on screen — totals against the rows above them, two screens
+against each other, the rendered value against the payload the page itself
+received, missing values against fabricated zeroes, and whether something you
+saved is still there after a reload.
+
+What it cannot do is say a value is **correct**, because that needs an authority
+it does not have. So when correctness is the question, it says so:
 
 ```
-GLANCE — uncalibrated, Pass-A only. No functional or data verification, no
-reproduction, no suppression check. These are an expert reviewer's opinions
-about what is on screen, not evidence about the product.
+needs_oracle: yes — cannot verify the figure without the batch record
 ```
 
-So: fine for "what's wrong with this page", fine for deciding where a real
-charter is worth writing. Not something to quote in a release decision, and not
-coverage of anything. Details: `references/glance-mode.md`.
+which is useful output: it tells you exactly where a real charter would earn its
+keep. Its label states the trade:
+
+```
+GLANCE — uncalibrated, no oracles. Functionality, navigation, and data honesty
+were exercised through the UI. Nothing was checked against a spec, API contract,
+or database, so no value here is verified as correct. Findings are not
+reproduced, not suppression-checked, and are not coverage. Judge each one on its
+screenshot.
+```
+
+**Uncalibrated does not mean unusable.** Calibration measures the harness, not
+the finding — you are the calibration in glance mode. A problem you can see in
+its screenshot is worth fixing without a rediscovery score. What you cannot do is
+add glance findings up into a statement about the product, or read "no findings"
+as good news. Details: `references/glance-mode.md`.
 
 Everything below describes the **full mode**, which is what turns a finding into
 evidence you can act on. It needs one file filled in (`PROFILE.md`) and a browser
@@ -221,7 +238,7 @@ you.
 | `scripts/check-platform-sync.sh` | fail if those pointers drift |
 | `skills/ui-qa/scripts/verify-run.sh` | the post-run check from step 7 |
 | `fixtures/serve.sh`, `fixtures/probe.sh` | the practice app and its bug checker |
-| `tests/run-tests.sh` | 79 tests for all of the above |
+| `tests/run-tests.sh` | 81 tests for all of the above |
 
 ---
 
@@ -384,7 +401,7 @@ read the answers — and tests enforce both. See
 ./scripts/install-git-hooks.sh                 # pre-commit checks
 ./scripts/sync-platform-dirs.sh                # after editing skills/ui-qa/
 ./scripts/check-platform-sync.sh --from-index  # verify what git will commit
-./tests/run-tests.sh                           # 79 tests, no dependencies
+./tests/run-tests.sh                           # 81 tests, no dependencies
 ```
 
 Two rules: edit only `skills/ui-qa/` (everything under `.claude/`, `.codex/`,

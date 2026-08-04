@@ -174,11 +174,20 @@ opinion on a screen, skip them:
 <skill>/scripts/verify-run.sh qa-output/<run_id> --glance
 ```
 
-No profile, no charter, no oracles, no coverage matrix, no calibration. The
-evaluator's expertise is identical — taxonomy plus any lenses you name — so the
-judgement quality is the same; what is missing is everything that would let you
-*rely* on it. Its output is labeled accordingly and the gate refuses a run whose
-label is missing.
+No profile, no charter, no coverage matrix, no calibration. The evaluator's
+expertise is identical — taxonomy plus any lenses you name — and it genuinely
+uses the app: journeys end to end, functionality, navigation, console and network,
+unhappy paths, each requested viewport.
+
+On data it goes as far as the UI allows: internal consistency (totals vs rows,
+screen vs screen), the rendered value vs the payload the page received, honest
+missing values, plausibility, and persistence by reload. It cannot pronounce a
+value **correct** — that needs an oracle — so those become `needs_oracle:`
+questions, which is the most useful thing a glance can hand you: a shortlist of
+what a real charter should verify.
+
+Its output is labeled accordingly and the gate refuses a run whose label is
+missing, or one that claims a value is wrong without a `needs_oracle` marker.
 
 Use it to triage a screen, to decide which surfaces deserve a real charter, or to
 demo the harness before committing to setup. Do not use it for a readiness call,
@@ -423,7 +432,7 @@ Left for you, because they are your files: the MCP registration, the line in
 ./scripts/install-git-hooks.sh                   # pre-commit: staged-index sync + purity scan
 ./scripts/sync-platform-dirs.sh                  # after editing skills/ui-qa/
 ./scripts/check-platform-sync.sh --from-index    # what the hook runs
-./tests/run-tests.sh [-v]                        # 79 tests, no dependencies
+./tests/run-tests.sh [-v]                        # 81 tests, no dependencies
 ```
 
 Rules for contributors:
