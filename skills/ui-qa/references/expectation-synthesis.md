@@ -93,6 +93,44 @@ exists, diff against it and propose amendments instead.
   **synthesized-charter run (uncalibrated)** and findings against `inferred`
   expectations are reported in their own clearly-marked section.
 
+## Refresh (`refresh <charter>`) — the drift audit
+
+`explore` creates; `refresh` reconciles. Run it when a feature has been
+enhanced, or on suspicion that the charter and the product have drifted apart.
+It requires an existing charter (and uses its dossier where one exists).
+
+Procedure: re-run Step 2 from scratch — derive a **fresh** expectations dossier
+from today's spec, schemas and code — then three-way compare: *stored dossier*
+vs *fresh dossier* vs *the charter's oracles and journeys*. Nothing is applied;
+every delta becomes a proposed amendment for human review, classified first by
+**direction**, because direction is what decides whether the oracle or the
+product is wrong:
+
+| What moved | What it means | Proposal |
+|---|---|---|
+| **Source of truth changed** (spec amended, schema field added), code follows | the oracle is stale | amend the oracle/dossier entry, citing the new spec section |
+| **Only the code/UI changed**, sources unchanged | NOT an oracle problem — the oracle now has teeth | **no oracle edit.** Run the charter: the mismatch is a candidate defect. If the verdict lane rules it *deliberate*, the spec is now the thing that is wrong — file the documentation gap, update the spec, then refresh again |
+| **Both changed, consistently** | a deliberate, documented change | amend, citing both |
+| **Both changed, inconsistently** | the genuinely interesting case | surface both citations side by side; a human decides which is authoritative |
+| **Surface or journey gone** | removed or renamed feature | propose removing the journey, or retiring the charter |
+
+The anti-circularity rule binds refresh exactly as it binds explore: **code is
+never the source that rewrites an oracle.** A refresh that "fixed" oracles to
+match drifted code would silently bless every regression and make Pass B
+vacuous — the second row of the table is the whole reason oracles exist.
+
+**The deliberate-drift lifecycle**, end to end: the run flags the mismatch →
+the verdict lane dispositions it *intended* → the suppression source records it
+as known-open, "spec update pending" → the spec is updated → `refresh`
+regenerates the oracle from the updated spec → the suppression entry closes.
+At no point did the oracle learn from the code; it learned from the spec, one
+human decision later. That one-step delay is the feature, not the friction: it
+is the only moment where "we changed it on purpose" and "it broke and nobody
+noticed" are forced to declare themselves as different things.
+
+A refreshed charter that gained or changed oracles is a changed judge: per the
+calibration protocol, treat its next run as calibration, not authority.
+
 ## What this mode does NOT change
 
 Pass A never sees the dossier. Fresh-eyes comprehension judgment is only

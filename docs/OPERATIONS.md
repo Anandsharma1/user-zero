@@ -206,6 +206,7 @@ Full rules: `<skill>/references/glance-mode.md`.
 /ui-qa <charter> --cohort novice,expert   one Pass A per persona, then aggregate
 /ui-qa <charter> --calibrate              calibration run (never readiness)
 /ui-qa explore <target> [--run]           synthesize a charter
+/ui-qa refresh <charter>                  drift audit after a feature change
 ```
 
 ### Scheduling and isolation

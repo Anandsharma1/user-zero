@@ -32,6 +32,7 @@ authoritative review lane.
 `/ui-qa <charter-name> [<charter-name> ...] [--calibrate]`
 `/ui-qa <charter-name> --cohort <persona>[,<persona>...]`
 `/ui-qa explore <route|module|functionality> [--run]`
+`/ui-qa refresh <charter-name>`
 
 - With `glance <route|url>`: **the lightweight mode.** One expert look at one
   screen — no profile required, no charter, no Pass B, no coverage matrix, no
@@ -55,6 +56,13 @@ authoritative review lane.
   clearly-labeled uncalibrated run. Procedure and the anti-circularity rule
   (code is never its own correctness oracle):
   `references/expectation-synthesis.md`.
+- With `refresh <charter-name>`: the feature changed — audit the charter for
+  drift. Re-derives the expectations dossier fresh, three-way compares it
+  against the stored dossier and the charter's oracles, classifies every delta
+  **by direction** (did the source of truth move, or only the code?), and
+  proposes amendments for human review. It never rewrites an oracle from
+  drifted code — that would bless every regression automatically. Procedure
+  and the direction table: `references/expectation-synthesis.md` §Refresh.
 - With no arguments: list available charters from the explorer directory and
   their isolation classes; do not run anything.
 
