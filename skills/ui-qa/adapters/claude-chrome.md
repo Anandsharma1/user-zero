@@ -207,7 +207,14 @@ Two browsers were connected. `list_connected_browsers` reports only `deviceId`,
 profile path**, so the paired profile cannot be identified from the tool
 surface at all. Selected `f7e7dcbe-9573-4871-b9b3-7da22a946091` ("Browser 1")
 and loaded `github.com`: it arrived signed out ("Sign in" / "Sign up"), no
-autofill. That is the QA profile.
+autofill.
+
+Note what that check does and does not establish. Signed-out proves the profile
+is *not a logged-in daily one*; it does not prove *which* profile it is, and any
+unused profile would pass it too. Identification needed a second, out-of-band
+signal: the fixture origin appeared in the browsing history of the QA profile's
+directory and in no other profile carrying the extension. Treat the logged-out
+check as a necessary gate, not an identification.
 
 Two things this exposed:
 
@@ -220,6 +227,13 @@ Two things this exposed:
   pairing can land in a daily profile. Naming a browser via `switch_browser`
   makes it recognizable in later sessions; removing the extension from the
   non-QA profiles is the actual fix.
+- **Renaming Chrome profiles does not help.** A profile has two names: the
+  display name (freely editable, cosmetic) and the on-disk directory
+  (`Profile 8`), which is the key Chrome stores in `Local State` →
+  `profile.info_cache` and the value `--profile-directory` takes — renaming that
+  folder makes Chrome forget the profile. Neither name reaches the agent, since
+  the browser-list tool reports neither. Only the extension-side browser name
+  does.
 
 **2. Capability 2, structured tree — PASS, better than the old guess.**
 `read_page` is a genuine role+name accessibility tree with stable `ref` ids,
