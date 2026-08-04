@@ -437,7 +437,7 @@ Left for you, because they are your files: the MCP registration, the line in
 ./scripts/install-git-hooks.sh                   # pre-commit: staged-index sync + purity scan
 ./scripts/sync-platform-dirs.sh                  # after editing skills/ui-qa/
 ./scripts/check-platform-sync.sh --from-index    # what the hook runs
-./tests/run-tests.sh [-v]                        # 81 tests, no dependencies
+./tests/run-tests.sh [-v]                        # 82 tests, no dependencies
 ```
 
 Rules for contributors:

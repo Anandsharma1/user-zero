@@ -20,7 +20,7 @@ Almost nothing:
 | Needed | Notes |
 |---|---|
 | A URL the app is serving | that is the whole setup |
-| The browser adapter loaded | same as any run |
+| The browser adapter loaded | same as any run. This is also where the Claude-in-Chrome adapter fits best — real-Chrome rendering for an opinions-grade look (`adapters/claude-chrome.md`, dedicated QA profile required) |
 | A persona sentence | optional; defaults to "a capable first-time user of this kind of product" |
 
 **No `PROFILE.md` required.** If one exists, glance borrows from it — but it

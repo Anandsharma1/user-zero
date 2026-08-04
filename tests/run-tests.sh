@@ -190,6 +190,22 @@ t_adapter_drives_tool_grant() {
     || ok "install rejects an adapter with no adapter file"
 }
 
+t_adapter_claude_chrome() {
+  local t; t="$(fresh_target)"
+  run "$REPO/scripts/install.sh" "$t" --adapter claude-chrome
+  local stub="$t/.claude/agents/user-zero.md"
+  [ -f "$stub" ] || { no "claude-chrome adapter" "agent stub not generated"; return; }
+  if grep -q 'mcp__playwright' "$stub"; then
+    no "claude-chrome adapter" "stub still grants playwright tools"
+  elif grep -q '^tools:' "$stub"; then
+    no "claude-chrome adapter" "stub pins a tools line for an adapter whose tool names vary"
+  elif ! grep -q 'adapters/claude-chrome.md' "$stub"; then
+    no "claude-chrome adapter" "stub does not point at the claude-chrome adapter file"
+  else
+    ok "claude-chrome adapter: stub inherits session tools and points at the right adapter"
+  fi
+}
+
 t_narrowing_platforms_prunes() {
   local t; t="$(fresh_target)"
   run "$REPO/scripts/install.sh" "$t" --platforms "claude codex"
@@ -846,7 +862,8 @@ for t in \
   t_owned_directory_is_replaceable t_reserved_dirs_refused \
   t_sync_refuses_symlinked_platform_dir t_install_refuses_symlinked_dest \
   t_install_preserves_user_content t_manifest_persists_explorer_dir t_placeholder_resolved \
-  t_codex_documented_location t_adapter_drives_tool_grant t_narrowing_platforms_prunes \
+  t_codex_documented_location t_adapter_drives_tool_grant t_adapter_claude_chrome \
+  t_narrowing_platforms_prunes \
   t_check_detects_worktree_drift t_check_platforms_forwarded \
   t_check_from_index_catches_partial_staging t_from_index_uses_staged_generator \
   t_gate_accepts_complete_run t_gate_requires_pass_b t_gate_requires_read_declaration \

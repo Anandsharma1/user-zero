@@ -28,7 +28,7 @@ purpose, and the blindness test that was supposed to catch them grepped only for
 **a fix applied to one instance of a class leaves the other instances**, and a
 test written against the defect you imagined does not cover the one you shipped.
 
-The tooling now has a 81-test suite covering every hole four review rounds
+The tooling now has a 82-test suite covering every hole four review rounds
 found by hand — installer containment and ownership-gated deletion, symlink-safe
 writes, staged-index correctness, platform pruning, fixture integrity, and
 nineteen distinct false-green paths in the run gate. Three rounds each found real
@@ -66,7 +66,7 @@ P0s.
 | Layer-1 purity | automated: no machine or product paths in `skills/` or `templates/`; every intra-skill reference resolves |
 | Adapter tool caveats | measured by hand on Playwright MCP 0.0.78 (2026-07-31), with the probe results recorded |
 
-`tests/run-tests.sh` — 81 tests, no dependencies. Every one exists because a
+`tests/run-tests.sh` — 82 tests, no dependencies. Every one exists because a
 reviewer found the corresponding hole by hand.
 
 ## What has NOT been verified

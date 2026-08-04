@@ -59,6 +59,11 @@ CANON="$ROOT/$BASE"
 # --- stays true of the generated stubs too, not only of the prose.
 case "$ADAPTER" in
   playwright-mcp) AGENT_TOOLS="Read, Write, mcp__playwright"; MCP_ID="playwright" ;;
+  # The Chrome extension's tool names vary by version and cannot be pinned here.
+  # An empty grant means the stub OMITS its tools line and inherits the
+  # session's tools -- broader than we like; the adapter's first-use checklist
+  # says to tighten it once the real names are recorded.
+  claude-chrome)  AGENT_TOOLS=""; MCP_ID="" ;;
   *)              AGENT_TOOLS="Read, Write"; MCP_ID="" ;;
 esac
 
@@ -123,15 +128,18 @@ EOF
 }
 
 write_agent_stub() {
-  local rel="$1" dest
+  local rel="$1" dest tools_line=""
   claim_path "$rel" || return 0
   safe_prepare_file "$ROOT" "$rel" || exit 1
   dest="$ROOT/$rel"
+  # An empty grant omits the line entirely: the agent inherits session tools
+  # (used by adapters whose tool names cannot be pinned, e.g. claude-chrome).
+  [ -n "$AGENT_TOOLS" ] && tools_line="tools: $AGENT_TOOLS"
   cat > "$dest" <<EOF
 ---
 name: user-zero
 description: $AGENT_DESC
-tools: $AGENT_TOOLS
+${tools_line}
 ---
 
 $GEN_NOTE

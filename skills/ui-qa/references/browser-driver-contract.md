@@ -74,12 +74,18 @@ no charter or profile oracle text should need to change.
 **A word on real-browser drivers** (e.g. a Chrome extension driving the
 operator's everyday browser, such as Claude's): the contract does not forbid
 one, but capability 7 — isolated browser state — is exactly what such a driver
-cannot provide. The operator's browser carries their cookies, logins, history
-and extensions, which (a) contaminates Pass A: a "first-time user" who arrives
-already logged in with warm state is not a first-time user; (b) makes
-console/network evidence unattributable — other tabs and extensions emit into
-the same session; and (c) points state-mutating journeys at whatever real
-accounts that browser is signed into. An adapter over such a driver must
-declare capability 7 unavailable, which limits it to `glance` on
-observation-only surfaces at most. The default adapter is Playwright MCP with
-`--isolated` precisely because of this.
+cannot provide by itself. The operator's browser carries their cookies,
+logins, history and extensions, which (a) contaminates Pass A: a "first-time
+user" who arrives already logged in with warm state is not a first-time user;
+(b) makes console/network evidence unattributable — other tabs and extensions
+emit into the same session; and (c) points state-mutating journeys at whatever
+real accounts that browser is signed into.
+
+`adapters/claude-chrome.md` binds this contract to Claude's Chrome extension
+anyway, with the mitigations spelled out: a **dedicated QA Chrome profile**
+with state cleared between runs (isolation becomes operator-provided instead of
+tool-enforced), a scope ceiling (glance and observation-only charters; never
+state-mutating, never calibration), and unverified capabilities declared as
+such until its first-use checklist is filled in. The default adapter remains
+Playwright MCP with `--isolated`, because tool-enforced isolation and full
+console/network evidence are what charter-grade claims rest on.
