@@ -1,8 +1,12 @@
 # Operations Guide
 
 Everything needed to install this harness into a product, get its first
-trustworthy run, and keep it honest. Read the [README](../README.md) first for
-the principles — this document assumes them and covers the mechanics.
+trustworthy run, and keep it honest. This document is the mechanics.
+
+If the words *profile*, *charter*, *oracle* and *lens* are not yet clear, read
+**[concepts.md](concepts.md)** first — it explains them with one e-commerce
+example carried end to end, and this guide will make much more sense afterwards.
+The [README](../README.md) covers the principles.
 
 Throughout, `<skill>` means wherever the skill was installed (default
 `skills/ui-qa`), and `<explorer>` means the product's explorer directory

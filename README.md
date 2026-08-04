@@ -7,6 +7,13 @@ and writes up what it finds with screenshots as proof.
 
 Works with Claude Code and Codex from one shared source.
 
+The reviewer is an AI agent; the **harness** is everything around it that makes
+its output worth believing — starting the app safely, deciding what must be
+covered before it looks, keeping the first pass ignorant of the specs, demanding
+a screenshot for every claim, and measuring itself against known bugs. New here?
+Start with **[docs/concepts.md](docs/concepts.md)** — it explains profile,
+charter, oracle and lens with one e-commerce example carried end to end.
+
 > **Status: uncalibrated.** The method is finished; the proof that it works is
 > not. Nobody has run it against a real product yet, and there are no
 > calibration scores. The supporting tooling has 81 tests, but four review
@@ -56,7 +63,8 @@ Pick by what you want the output to be good for.
 | **Good for** | "what's wrong with this page", deciding where a charter is worth writing | anything you need to rely on |
 
 Same evaluator and same expertise in both. The difference is entirely in what
-surrounds it.
+surrounds it — see [docs/concepts.md](docs/concepts.md) for why that difference
+falls out of one simple table.
 
 ---
 
@@ -435,6 +443,10 @@ in the harness — those belong in `PROFILE.md`. See [AGENTS.md](AGENTS.md).
 
 ## Further reading
 
+- **[docs/concepts.md](docs/concepts.md)** — **start here.** Harness, profile,
+  charter, oracle, lens in plain terms, with a full e-commerce checkout example
+  showing which concept produced which finding. Plus a glossary of every other
+  term.
 - **[docs/known-limitations.md](docs/known-limitations.md)** — what is proven,
   what is not, and which rules are enforced by code versus by instructions.
   Read this before trusting a run.
