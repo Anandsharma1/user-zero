@@ -41,6 +41,16 @@ opinions. The harness is what stops that:
 
 The evaluator supplies judgement. The harness supplies the reasons to believe it.
 
+One framing to keep in mind throughout: this is a **generic explorer**, not a
+test suite. Your test suite asserts the specific things you already thought of,
+is written per product, and stays your regression backbone — built separately,
+as it should be. This agent brings generalized UI/UX expertise (the spine and
+lenses are industry knowledge: Nielsen, Gestalt, WCAG, design-system pattern
+rules) to *any* product, and the profile/charter layer is the thin adapter that
+points that expertise at yours. Its job is to explore and assess — to find the
+problems nobody wrote an assertion for — and its confirmed defects then flow
+*into* your test suite as pinned regressions, not the other way around.
+
 ---
 
 ## The easiest analogy: you're hiring a tester
@@ -78,8 +88,63 @@ So the two passes fall straight out of it:
 - **Pass B** (informed) gets the left column, and can now check whether things
   are actually correct.
 
+The A-before-B ordering stops being an arbitrary rule and becomes a
+consequence of the table.
+
 If a fact would still be true on a completely different product, it belongs on
 the right. If it's true only of yours, it belongs on the left.
+
+---
+
+## Where each piece comes from, and what happens when things change
+
+The table above says what each piece *is*. This one says who writes it, where
+it lives, and how it evolves. Everything here is a file you can open, read, and
+edit — nothing is regenerated invisibly at run time.
+
+| Piece | First version comes from | Lives at | When your product changes |
+|---|---|---|---|
+| **Profile** | the **onboarding procedure**: two agent roles — one reads product docs and the UI surface, the other reads run mechanics and test infrastructure — draft it together; **a human approves it** before any run claims authority | `qa/product-explorer/PROFILE.md` | edit it by hand, or re-run onboarding for a major revision; it is a document, not a cache |
+| **Charter** | you copy the template, **or** `/ui-qa explore <route>` drafts one by reading the spec, API schemas and code — then stops for your review | `qa/product-explorer/charters/<name>.md` | `explore` **never overwrites** an existing charter: run it again and it diffs against what exists and proposes amendments — new journeys, changed oracles — for you to accept. Nothing updates itself silently |
+| **Oracles** | picked by whoever writes the charter, from the profile's oracle map and (in `explore` mode) the drafted expectations dossier | inside the charter, §7 | amended with the charter, same review step |
+| **North-star question** | the charter author — you, or `explore`'s draft that you approve | inside the charter, §2 | usually stable; it is the feature's purpose, not its implementation |
+| **Journeys** | the spec's user journeys where they exist; otherwise the surface's visible affordances (`explore` derives them); the author **trims** | inside the charter, §5 | new journeys arrive as proposed amendments, not silently |
+| **Lenses** | ship with the harness — they are industry knowledge, not product knowledge | `skills/ui-qa/lenses/` | grow **upstream**, via harness upgrades, when a whole *class* of concern is missing (that is how four of the ten were added). Your product never adds lenses; your charters just name them |
+| **Spine** | ships with the harness | `skills/ui-qa/references/ux-evaluation-taxonomy.md` | same — upstream only |
+
+Three rules worth pulling out of that table:
+
+1. **Generated once, read every run, inspectable always.** The profile is not
+   re-derived each time user-zero runs — that would be slow, drifting, and
+   unauditable. It is drafted once (by agents reading your docs and code),
+   frozen by human approval, and then simply *read*. If it says something wrong,
+   you open the file and fix the line.
+2. **`explore` can draft, only a human can approve.** The agent is good at
+   sifting a spec, an API schema, and the code to propose journeys and oracles.
+   It is explicitly forbidden from treating the code as proof of its own
+   correctness (the *anti-circularity rule*: "the component renders X" is never
+   evidence that X is right — code-derived expectations may support
+   *consistency* findings only). And a draft charter or profile authorizes
+   nothing until someone signs it.
+3. **Nothing self-updates.** When you enhance a feature and run its charter, the
+   run will *find* the mismatch — journeys that no longer complete, oracles that
+   no longer hold — and report it. Updating the charter is then a proposed,
+   reviewable diff (`/ui-qa explore <target>` again), not a side effect of
+   running.
+
+### Personas: who is used when
+
+The **profile** lists the personas that exist (§5) — think of it as the cast.
+Each **charter** names which one Pass A embodies (§1) — one persona per run,
+because fresh eyes belong to *someone in particular*. Different charters
+naturally pick different personas: your import flow wants the first-timer, your
+dense analytics screen wants the returning analyst.
+
+You do not choose at run time and it does not run all of them. If you *want*
+several viewpoints on the same mission, that is the explicit cohort mode —
+`/ui-qa <charter> --cohort novice,expert` — which runs one independent fresh
+Pass A per persona and then compares, with its own rules about what agreement
+does and does not prove.
 
 ---
 
@@ -273,11 +338,27 @@ fee is actually being charged without the basket API
 Which is a useful thing to hand someone. That's the mode's real output: a
 shortlist of what a charter should verify.
 
+One refinement: if a profile *does* exist, glance borrows its **broad** rules —
+the §6 vocabulary and format conventions ("money shows £ and two decimals",
+"never render a missing value as 0") — and judges against them directly,
+because those are rules about how things should *appear*, not about which value
+is right. It still never loads the oracle map or anything per-feature. So on
+the checkout example, "£0.00 where the price is unknown" becomes a direct
+finding citing the store's own convention, while the delivery-line lie still
+needs a charter.
+
 ---
 
 ## The overloaded word: "oracle"
 
-It gets used two ways, so worth separating:
+In the simplest terms: **an oracle is anything that lets you say "this is what
+it *should* be."** A spec section, an API response, a database row, a stated
+formatting rule. A charter's oracles are then the handful of specific
+assertions you make against those sources — "the total shown must equal the
+API's total." No oracle, no correctness verdict; that is the whole boundary
+between what `glance` can and cannot say.
+
+Beyond that, it gets used two ways, worth separating:
 
 1. **The oracle map** (profile §7) — the *library*. Which documents and endpoints
    are trustworthy, and the traps in using them ("only §3–5 are assertable").

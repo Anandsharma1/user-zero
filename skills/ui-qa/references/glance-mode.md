@@ -23,9 +23,24 @@ Almost nothing:
 | The browser adapter loaded | same as any run |
 | A persona sentence | optional; defaults to "a capable first-time user of this kind of product" |
 
-**No `PROFILE.md` required.** If one exists, glance uses its origin, personas and
-viewports for convenience — but it never requires approval, because it never
-claims anything a profile would authorize.
+**No `PROFILE.md` required.** If one exists, glance borrows from it — but it
+never requires approval, because it never claims anything a profile would
+authorize. What it borrows, in increasing order of teeth:
+
+- **§1, §5, §10 — origin, personas, viewports**: pure convenience.
+- **§6 — vocabulary and format conventions**: these are *product-level rules*,
+  not per-value oracles ("money shows the currency and two decimals", "a
+  missing value is never rendered as 0", "say basket, not cart"), and glance
+  may judge against them. A screen violating the product's own stated
+  convention is a direct finding, cited as such — not a `needs_oracle`
+  question. This is the honest middle ground: broad rules about *how* things
+  should appear, without any authority over *which* value is right.
+- **§7 — the oracle map, and everything per-feature**: never loaded. The moment
+  a specific value needs verifying against a spec or an API, that is a
+  charter's job.
+
+Findings judged against §6 say so (`principle: PROFILE §6 — date format`), so a
+reader can tell industry judgement from your own house rules.
 
 ## It really does use the product
 
