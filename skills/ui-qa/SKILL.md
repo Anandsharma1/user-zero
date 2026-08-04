@@ -28,9 +28,18 @@ authoritative review lane.
 
 ## Invocation
 
+`/ui-qa glance <route|url> [--persona "..."] [--lenses a,b] [--viewports a,b]`
 `/ui-qa <charter-name> [<charter-name> ...] [--calibrate]`
 `/ui-qa <charter-name> --cohort <persona>[,<persona>...]`
 `/ui-qa explore <route|module|functionality> [--run]`
+
+- With `glance <route|url>`: **the lightweight mode.** One expert look at one
+  screen — no profile required, no charter, no Pass B, no coverage matrix, no
+  calibration. Output is labeled as opinions, not evidence, and licenses
+  nothing. Use it to find the obvious problems and to decide where a real
+  charter is worth writing. Procedure and limits:
+  `references/glance-mode.md`. Everything below this line describes the full
+  mode.
 
 - With one or more charter names: run those charters (scheduling rules below).
 - With `--calibrate`: run the calibration protocol for the named charters and
@@ -51,7 +60,9 @@ authoritative review lane.
 
 If `PROFILE.md` is missing, do not improvise a profile — run the onboarding
 procedure in `references/profile-schema.md` to draft one, and stop for human
-approval before any charter claims authority.
+approval before any charter claims authority. **`glance` is the exception**: it
+needs no profile because it claims nothing. Offer it when someone wants a quick
+read and does not want to set the harness up.
 
 ## Browser tooling
 

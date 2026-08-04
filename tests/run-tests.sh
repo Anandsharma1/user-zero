@@ -588,6 +588,68 @@ t_dest_inside_platform_dir_refused() {
   fi
 }
 
+# ================================================================ glance mode
+
+make_glance() {  # <dir> ; a minimal glance run that should PASS
+  local d="$1"; mkdir -p "$d/evidence"; printf 'shot\n' > "$d/evidence/01.png"
+  {
+    printf 'GLANCE — uncalibrated, Pass-A only. No functional or data verification.\n\n'
+    printf -- '- id: g-01\n  class: product-defect\n  route_state: /dashboard loaded\n'
+    printf -- '  persona: capable first-time user\n  screenshot: evidence/01.png\n'
+    printf -- '  observed: match rate shown with no denominator\n'
+    printf -- '  principle: taxonomy 5 aggregates\n  consequence: one point reads as a trend\n'
+    printf -- '  recommendation: show "11 of 15" beside the percentage\n'
+    printf -- '  severity: high\n  confidence: high\n'
+  } > "$d/glance.md"
+}
+
+t_glance_accepts_minimal_run() {
+  local d="$WORK/glance-ok"; make_glance "$d"
+  run "$GATE" "$d" --glance \
+    && ok "glance gate accepts a labeled run with no profile, coverage or Pass B" \
+    || no "glance gate" "a valid glance run was rejected"
+}
+
+t_glance_requires_label() {
+  local d="$WORK/glance-nolabel"; make_glance "$d"
+  sed -i '1s/.*/Quick UI look/' "$d/glance.md"
+  run "$GATE" "$d" --glance \
+    && no "glance label" "an unlabeled glance passed — it could be quoted as evidence" \
+    || ok "glance gate requires the label that stops it reading as evidence"
+}
+
+t_glance_still_requires_finding_quality() {
+  local d="$WORK/glance-thin"; make_glance "$d"
+  printf -- '- id: g-02\n  class: observation\n  observed: feels cluttered\n' >> "$d/glance.md"
+  run "$GATE" "$d" --glance \
+    && no "glance finding quality" "a bare judgement passed in glance mode" \
+    || ok "glance relaxes the process but not the finding-quality contract"
+}
+
+t_glance_does_not_demand_full_artifacts() {
+  # The point of the mode: no coverage matrix, no hashes, no pass-b-report.
+  local d="$WORK/glance-min"; make_glance "$d"
+  local out; out="$("$GATE" "$d" --glance 2>&1)"
+  printf '%s' "$out" | grep -qiE 'coverage-required|pass-b-report|sha256' \
+    && no "glance scope" "glance gate demanded full-mode artifacts" \
+    || ok "glance gate does not demand coverage, hashes or a Pass-B report"
+}
+
+t_glance_flag_is_exclusive() {
+  local d="$WORK/glance-excl"; make_glance "$d"
+  run "$GATE" "$d" --glance --cohort \
+    && no "glance flags" "--glance combined with --cohort was accepted" \
+    || ok "--glance refuses to combine with --cohort/--pass-a-only"
+}
+
+t_glance_catches_credentials() {
+  local d="$WORK/glance-secret"; make_glance "$d"
+  printf 'authorization: Bearer abcdefghijklmnopqrstuvwxyz012345\n' > "$d/evidence/02.txt"
+  run "$GATE" "$d" --glance \
+    && no "glance secret scan" "a credential in glance evidence was accepted" \
+    || ok "glance gate still scans evidence for credentials"
+}
+
 # =================================================================== uninstall
 
 t_uninstall_removes_what_it_installed() {
@@ -782,6 +844,9 @@ for t in \
   t_gate_resolves_symlinked_evidence t_gate_catches_duplicate_coverage_row \
   t_gate_catches_empty_read_declaration t_gate_requires_defect_priority \
   t_gate_checks_severity_vocabulary t_gate_cohort_needs_two_personas \
+  t_glance_accepts_minimal_run t_glance_requires_label \
+  t_glance_still_requires_finding_quality t_glance_does_not_demand_full_artifacts \
+  t_glance_flag_is_exclusive t_glance_catches_credentials \
   t_uninstall_removes_what_it_installed t_uninstall_keeps_user_work \
   t_uninstall_purge_removes_explorer t_uninstall_keeps_unowned_files \
   t_uninstall_dry_run_changes_nothing t_uninstall_refuses_reserved_manifest_dest \

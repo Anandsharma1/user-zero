@@ -9,7 +9,7 @@ Works with Claude Code and Codex from one shared source.
 
 > **Status: uncalibrated.** The method is finished; the proof that it works is
 > not. Nobody has run it against a real product yet, and there are no
-> calibration scores. The supporting tooling has 73 tests, but four review
+> calibration scores. The supporting tooling has 79 tests, but four review
 > rounds each found real bugs after the previous round's tests passed — so treat
 > the tests as proof about their own cases, not about the whole thing.
 > [docs/known-limitations.md](docs/known-limitations.md) lists exactly what is
@@ -56,6 +56,7 @@ cd user-zero
 Then, in Claude Code or Codex inside your repo:
 
 ```
+/ui-qa glance /dashboard                 quick expert look at one screen — no setup
 /ui-qa                                   list the charters you have
 /ui-qa explore /dashboard                write a charter for a screen you have not covered
 /ui-qa checkout-flow                     run one charter
@@ -63,8 +64,31 @@ Then, in Claude Code or Codex inside your repo:
 /ui-qa checkout-flow --cohort novice,expert   run it as several kinds of user
 ```
 
-Before the first run you need to fill in one file (`PROFILE.md`) and register a
-browser tool. The installer prints both steps. Full walkthrough:
+### Just want a quick look? Use `glance`
+
+```
+/ui-qa glance /dashboard --lenses forms-and-validation
+```
+
+`glance` needs **nothing set up** — no profile, no charter, no calibration. It
+opens the screen, applies the same expert checklist the full mode uses, and
+tells you what is obviously wrong, with screenshots.
+
+The trade is stated in its own output, which always starts with:
+
+```
+GLANCE — uncalibrated, Pass-A only. No functional or data verification, no
+reproduction, no suppression check. These are an expert reviewer's opinions
+about what is on screen, not evidence about the product.
+```
+
+So: fine for "what's wrong with this page", fine for deciding where a real
+charter is worth writing. Not something to quote in a release decision, and not
+coverage of anything. Details: `references/glance-mode.md`.
+
+Everything below describes the **full mode**, which is what turns a finding into
+evidence you can act on. It needs one file filled in (`PROFILE.md`) and a browser
+tool registered — the installer prints both steps. Full walkthrough:
 [docs/OPERATIONS.md](docs/OPERATIONS.md).
 
 Want to see it work without touching your product? Skip to
@@ -360,7 +384,7 @@ read the answers — and tests enforce both. See
 ./scripts/install-git-hooks.sh                 # pre-commit checks
 ./scripts/sync-platform-dirs.sh                # after editing skills/ui-qa/
 ./scripts/check-platform-sync.sh --from-index  # verify what git will commit
-./tests/run-tests.sh                           # 73 tests, no dependencies
+./tests/run-tests.sh                           # 79 tests, no dependencies
 ```
 
 Two rules: edit only `skills/ui-qa/` (everything under `.claude/`, `.codex/`,

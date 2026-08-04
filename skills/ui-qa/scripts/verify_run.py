@@ -489,12 +489,77 @@ def check_stack_collision(run: Path, rep: Report) -> None:
 
 # ----------------------------------------------------------------------- main
 
+GLANCE_LABEL = "GLANCE — uncalibrated, Pass-A only"
+
+# Glance findings drop the three fields that have nothing to hang on in this
+# mode: priority (no triage), suppression_check (no suppression sources), and
+# disposition (no verdict lane). See references/glance-mode.md.
+GLANCE_FINDING_FIELDS = [
+    "class", "route_state", "persona", "observed", "principle",
+    "consequence", "recommendation", "severity", "confidence",
+]
+
+
+def check_glance(run: Path, rep: Report) -> None:
+    """Gate a glance run: the small set of checks that actually apply.
+
+    Deliberately does not check coverage, hashes, or Pass B. None of those exist
+    in this mode, and pretending to check them would be the dishonesty the mode
+    is designed to avoid.
+    """
+    path = run / "glance.md"
+    if not (path.is_file() and path.stat().st_size > 0):
+        rep.fail("missing or empty artifact: glance.md")
+        return
+    rep.ok("artifact glance.md")
+
+    text = read_text(path) or ""
+    if GLANCE_LABEL in text:
+        rep.ok("glance label present (output cannot be mistaken for evidence)")
+    else:
+        rep.fail("glance.md does not carry the mandatory label — it must begin "
+                 f'with "{GLANCE_LABEL}. ..." verbatim (references/glance-mode.md)')
+
+    if (run / "evidence").is_dir():
+        rep.ok("evidence/ present")
+    else:
+        rep.fail("missing evidence/ directory")
+
+    records = parse_findings(text)
+    if not records:
+        rep.note("no finding records parsed — a glance that found nothing should "
+                 "say so in its summary, which is a legitimate result")
+    else:
+        incomplete = [(r.get("id", "<no id>"),
+                       [f for f in GLANCE_FINDING_FIELDS if not r.get(f)])
+                      for r in records]
+        incomplete = [(i, m) for i, m in incomplete if m]
+        if incomplete:
+            rep.fail(f"glance.md: {len(incomplete)} of {len(records)} records missing "
+                     "mandatory fields (relaxing the process does not relax the finding):")
+            for fid, missing in incomplete[:10]:
+                rep.fail(f"    {fid}: {' '.join(missing)}")
+        else:
+            rep.ok(f"findings: {len(records)} records each carry all glance-mode fields")
+
+    for rec in records:
+        cls = rec.get("class", "").strip().lower()
+        if cls and cls not in FINDING_CLASSES:
+            rep.fail(f"glance.md {rec.get('id', '<no id>')}: unknown class '{cls}'")
+
+    rep.note("glance mode: coverage, hashes and Pass B are not checked because "
+             "they do not exist here. This run is not coverage of anything and "
+             "cannot support a readiness claim.")
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(add_help=True, description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("run_dir")
     ap.add_argument("--cohort", action="store_true")
     ap.add_argument("--pass-a-only", action="store_true")
+    ap.add_argument("--glance", action="store_true",
+                    help="gate a glance run (references/glance-mode.md)")
     ap.add_argument("--json", action="store_true", help="machine-readable result")
     args = ap.parse_args(argv)
 
@@ -504,6 +569,16 @@ def main(argv: list[str]) -> int:
         return 2
 
     rep = Report()
+    if args.glance:
+        if args.cohort or args.pass_a_only:
+            print("verify-run: --glance cannot be combined with --cohort or "
+                  "--pass-a-only", file=sys.stderr)
+            return 2
+        check_glance(run, rep)
+        check_secrets(run, rep)
+        check_stack_collision(run, rep)
+        return _emit(rep, run, args.json)
+
     reports = check_artifacts(run, rep, args.cohort, args.pass_a_only)
     check_hashes(run, rep, args.cohort)
     check_read_declarations(run, rep, reports)
@@ -511,8 +586,12 @@ def main(argv: list[str]) -> int:
     check_findings(run, rep)
     check_secrets(run, rep)
     check_stack_collision(run, rep)
+    return _emit(rep, run, args.json)
 
-    if args.json:
+
+def _emit(rep: Report, run: Path, as_json: bool) -> int:
+
+    if as_json:
         print(json.dumps({
             "run": str(run),
             "passed": not rep.failures,

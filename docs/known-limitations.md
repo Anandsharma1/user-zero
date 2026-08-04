@@ -28,7 +28,7 @@ purpose, and the blindness test that was supposed to catch them grepped only for
 **a fix applied to one instance of a class leaves the other instances**, and a
 test written against the defect you imagined does not cover the one you shipped.
 
-The tooling now has a 73-test suite covering every hole four review rounds
+The tooling now has a 79-test suite covering every hole four review rounds
 found by hand — installer containment and ownership-gated deletion, symlink-safe
 writes, staged-index correctness, platform pruning, fixture integrity, and
 nineteen distinct false-green paths in the run gate. Three rounds each found real

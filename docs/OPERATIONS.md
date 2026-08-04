@@ -164,6 +164,27 @@ correctly has none. See `<skill>/lenses/MANIFEST.md`.
 
 ---
 
+## 3b. The shortcut: `glance`
+
+Steps 2 and 3 exist so a finding can become evidence. If you only want an expert
+opinion on a screen, skip them:
+
+```
+/ui-qa glance <route|url> [--persona "..."] [--lenses a,b] [--viewports a,b]
+<skill>/scripts/verify-run.sh qa-output/<run_id> --glance
+```
+
+No profile, no charter, no oracles, no coverage matrix, no calibration. The
+evaluator's expertise is identical — taxonomy plus any lenses you name — so the
+judgement quality is the same; what is missing is everything that would let you
+*rely* on it. Its output is labeled accordingly and the gate refuses a run whose
+label is missing.
+
+Use it to triage a screen, to decide which surfaces deserve a real charter, or to
+demo the harness before committing to setup. Do not use it for a readiness call,
+do not feed it to the regression or RCA lanes, and do not count it as coverage.
+Full rules: `<skill>/references/glance-mode.md`.
+
 ## 4. Run
 
 ```
@@ -402,7 +423,7 @@ Left for you, because they are your files: the MCP registration, the line in
 ./scripts/install-git-hooks.sh                   # pre-commit: staged-index sync + purity scan
 ./scripts/sync-platform-dirs.sh                  # after editing skills/ui-qa/
 ./scripts/check-platform-sync.sh --from-index    # what the hook runs
-./tests/run-tests.sh [-v]                        # 73 tests, no dependencies
+./tests/run-tests.sh [-v]                        # 79 tests, no dependencies
 ```
 
 Rules for contributors:
