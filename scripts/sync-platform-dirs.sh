@@ -193,7 +193,7 @@ write_command_stub() {
   cat > "$dest" <<EOF
 ---
 description: Run a human-style UI QA charter (ui-qa harness)
-argument-hint: "glance <route> [--adapter <name>] | [charter ...] | explore <target> | refresh <charter> | <charter> --cohort <persona,...>"
+argument-hint: "glance <route> [--adapter <name>] [--cross-check <adapter>] | [charter ...] | explore <target> | refresh <charter> | <charter> --cohort <persona,...>"
 ---
 
 $GEN_NOTE

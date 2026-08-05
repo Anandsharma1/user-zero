@@ -93,9 +93,19 @@ Then, in Claude Code or Codex inside your repo:
 
 ```
 /ui-qa glance /dashboard --lenses forms-and-validation
+/ui-qa glance /dashboard --adapter claude-chrome          # through real Chrome
+/ui-qa glance /dashboard --cross-check claude-chrome      # Playwright primary, Chrome re-check
 ```
 
 `glance` needs **nothing set up** — no profile, no charter, no calibration.
+
+Which browser drives it is a **binding, not a discovery**: an explicit
+`--adapter` flag wins, else the profile's binding, else whatever the session
+has. Two adapters ship — Playwright MCP (the default: isolation, network
+bodies, phone viewports) and Claude-in-Chrome (real-Chrome rendering; measured
+limits, dedicated QA profile required). `--cross-check` gives you both the
+sane way: primary run on one, rendering-sensitive findings re-judged on the
+other, every screenshot naming its instrument. Never two primaries.
 
 It still *uses* the product: walks journeys end to end, clicks things and checks
 they do what they say, tests Back/refresh/deep links, watches the console, and

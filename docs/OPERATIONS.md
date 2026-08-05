@@ -174,9 +174,16 @@ Steps 2 and 3 exist so a finding can become evidence. If you only want an expert
 opinion on a screen, skip them:
 
 ```
-/ui-qa glance <route|url> [--persona "..."] [--lenses a,b] [--viewports a,b]
+/ui-qa glance <route|url> [--adapter <name>] [--cross-check <adapter>]
+              [--persona "..."] [--lenses a,b] [--viewports a,b]
 <skill>/scripts/verify-run.sh qa-output/<run_id> --glance
 ```
+
+Adapter precedence: `--adapter` flag > the profile's §10 binding > session
+tools (profile-less only). `--cross-check <adapter>` re-judges the primary
+run's rendering-sensitive findings (contrast, legibility, compositing) through
+a second instrument without re-walking anything — see glance-mode §Dual mode.
+Connected MCP servers are not candidates; a binding must name the adapter.
 
 No profile, no charter, no coverage matrix, no calibration. The evaluator's
 expertise is identical — taxonomy plus any lenses you name — and it genuinely

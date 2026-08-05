@@ -44,6 +44,7 @@ So the honest division of labor:
 | Use | Adapter |
 |---|---|
 | `glance` — expert look, opinions with screenshots | **claude-chrome is a good fit** |
+| `--cross-check` on a Playwright glance | **its sharpest role** — re-judging contrast/legibility/compositing findings in the renderer users actually run |
 | observation-only charters | possible with the mitigations below, degraded evidence declared |
 | state-mutating charters | **never through this adapter** |
 | calibration runs | no — calibration measures the evaluator through the adapter it will actually use; mixed-adapter scores are not comparable |
