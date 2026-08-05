@@ -162,6 +162,12 @@ One browser, one screen, one explorer. No parallel exploration of any kind
 through this adapter — including cohort personas, which run strictly serially
 with a full state clear between them.
 
+The same applies to the **operator**: while a run is live, the QA window is the
+explorer's. Clicking, typing, scrolling, or switching tabs in it mid-run
+injects your input into its evidence — screenshots that show states the
+explorer never produced, console entries from pages it never visited. Watch,
+don't touch; if you must intervene, stop the run and say so in the debrief.
+
 ## First-use checklist (do once per extension version, record results here)
 
 This probes the **adapter**, not any product — it is product-independent and its

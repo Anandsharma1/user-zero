@@ -216,6 +216,16 @@ Full rules: `<skill>/references/glance-mode.md`.
 /ui-qa refresh <charter>                  drift audit after a feature change
 ```
 
+### What runs where during a run (and what you must keep up, down, or open)
+
+| Thing | Whose it is | During a run |
+|---|---|---|
+| **Your dev stack** (backend/UI you develop against) | yours | not used — the harness starts its own. But beware shared infrastructure: if your dev backend holds connections on the database the profile clones from, a fail-closed clone will abort. Check your profile §2/§3; when in doubt, stop the dev backend |
+| **The QA stack** (own ports, cloned state) | the harness's | brought up per profile §2, identity-verified, torn down after. Never point anything of yours at it |
+| **Shared database server** (e.g. a Postgres container) | infrastructure | must be up. Runs create their own database/snapshot inside or beside it — same server, different data (profile §3) |
+| **Your browser** | yours | Playwright adapter: irrelevant, keep or close anything. claude-chrome adapter: the dedicated QA-profile window must be open, paired, unmaximized — and **hands-off for the duration**: it is the explorer's window while the run is live |
+| **`qa-output/`** | the run's evidence | never touched by stack teardown; gitignored |
+
 ### Scheduling and isolation
 
 | Class | Parallel? | Requires |
