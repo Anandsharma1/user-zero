@@ -9,8 +9,9 @@ is wrong. Glance mode is that, and it exists as its own mode so its output can b
 honest about what it did — instead of a charter run with checks quietly skipped.
 
 ```
-/ui-qa glance <route|url> [--adapter <name>] [--persona "one sentence"]
-                          [--lenses a,b] [--viewports desktop,mobile]
+/ui-qa glance <route|url> [--adapter <name>] [--cross-check <adapter>]
+                          [--persona "one sentence"] [--lenses a,b]
+                          [--viewports desktop,mobile]
 ```
 
 ## What it needs
@@ -63,6 +64,48 @@ evidence item**, an unmaximized window, `clear: true` on console reads, no
 phone-width viewports (clamps at 500px — declare those rows blocked, do not
 fake them), and network metadata only. A glance may not use an adapter for a
 task the adapter's own file forbids.
+
+## Dual mode: one primary, one cross-check — never two primaries
+
+`--cross-check <adapter>` runs the glance normally through the primary
+adapter, then re-examines a **bounded subset of findings** through the second
+one. It exists because the two adapters are different *instruments*: Playwright
+has the evidence machinery (network bodies, structured tables, phone
+viewports); real Chrome has the rendering truth (real fonts, GPU compositing,
+true DPR). A contrast judgment made in headless Chromium deserves a second look
+in the browser users actually run.
+
+What the cross-check pass does:
+
+- re-opens **only rendering-sensitive findings** from the primary run —
+  contrast, font legibility, subpixel/antialiasing effects, GPU-composited
+  layers, DPR-dependent sizing. Nothing else qualifies.
+- annotates each with its own screenshot and one of:
+  `cross_check: confirmed (claude-chrome 1.0.84)` — renders the same;
+  `cross_check: differs — <how>` — the rendering difference, described;
+  `cross_check: n/a — <reason>` — e.g. the finding is at a phone width the
+  second adapter cannot reach.
+
+What it must never do:
+
+- **re-walk journeys or make new coverage claims.** The secondary pass is a
+  re-look at named findings, not a second exploration; anything new it happens
+  to notice is at most an observation, marked as coming from outside the
+  primary pass.
+- promote or demote a finding by itself. `differs` is information for the
+  reader, not an automatic verdict — a difference between renderers is
+  sometimes the finding (a real-Chrome-only glitch) and sometimes the
+  refutation (headless-only artifact); saying which requires a human.
+- hide either adapter's identity. Every screenshot in the run says which
+  instrument produced it.
+
+Why never two primaries: two browsers exploring in parallel double the cost,
+split evidence provenance, and produce two half-coverages that read as one
+whole. And for charters, calibration is per-adapter — scores from a
+two-primary run would be comparable to nothing. (Charters therefore have no
+cross-check flag yet; if a rendering question matters at charter level, run
+the charter on Playwright and a separate glance --adapter claude-chrome on the
+specific screen.)
 
 ## It really does use the product
 
