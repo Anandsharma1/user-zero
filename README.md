@@ -51,9 +51,9 @@ principles come from
 - Gestalt,
 - Fitts's and Hick's laws,
 - WCAG,
-- Component guidance of Material, Apple HIG, Carbon and Polaris. 
-They live in three places: the
-**spine** (always loaded), ten optional **lenses**, and the **evaluator's own
+- Component guidance of Material, Apple HIG, Carbon and Polaris.
+  
+They live in three places: the **spine** (always loaded), ten optional **lenses**, and the **evaluator's own
 operating rules**.
 
 ### Data honesty — the checks ordinary tests skip
