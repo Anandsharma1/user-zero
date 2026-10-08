@@ -44,9 +44,9 @@ Two things make it more than "ask an AI to look at my UI":
 
 Every judgement traces to a named principle, so a finding reads "this confused
 me *because* the heading names an internal feature" — not "this feels off". The
-principles come from Nielsen's heuristics, Norman's design principles, ISO
+principles come from **Nielsen's heuristics, Norman's design principles, ISO
 9241-110, Gestalt, Fitts's and Hick's laws, WCAG, and the component guidance of
-Material, Apple HIG, Carbon and Polaris. They live in three places: the
+Material, Apple HIG, Carbon and Polaris**. They live in three places: the
 **spine** (always loaded), ten optional **lenses**, and the **evaluator's own
 operating rules**.
 
