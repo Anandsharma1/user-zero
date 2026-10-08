@@ -14,14 +14,6 @@ a screenshot for every claim, and measuring itself against known bugs. New here?
 Start with **[docs/concepts.md](docs/concepts.md)** — it explains profile,
 charter, oracle and lens with one e-commerce example carried end to end.
 
-> **Status: uncalibrated.** The method is finished; the proof that it works is
-> not. Nobody has run it against a real product yet, and there are no
-> calibration scores. The supporting tooling has 82 tests, but four review
-> rounds each found real bugs after the previous round's tests passed — so treat
-> the tests as proof about their own cases, not about the whole thing.
-> [docs/known-limitations.md](docs/known-limitations.md) lists exactly what is
-> checked by code and what depends on the agent following instructions.
-
 ---
 
 ## What it is for
