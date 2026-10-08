@@ -454,7 +454,7 @@ Left for you, because they are your files: the MCP registration, the line in
 ./scripts/install-git-hooks.sh                   # pre-commit: staged-index sync + purity scan
 ./scripts/sync-platform-dirs.sh                  # after editing skills/ui-qa/
 ./scripts/check-platform-sync.sh --from-index    # what the hook runs
-./tests/run-tests.sh [-v]                        # 83 tests, no dependencies
+./tests/run-tests.sh [-v]                        # 90 tests, no dependencies
 ```
 
 Rules for contributors:
@@ -482,3 +482,93 @@ Rules for contributors:
 - **Measured claims carry their measurement.** The adapter's console-buffer
   table exists because it was probed on a specific version and date. Add the
   version and date, or do not add the claim.
+
+
+## Native skill and plugin installation
+
+Use the commands in README §Installation. These routes load the same canonical
+method; the repository-local installer remains useful for product templates and
+versioning the harness alongside a product.
+
+### What belongs where
+
+- `plugin.json` is the package identity and release version.
+- `mcp.json` is the shared pinned Playwright configuration.
+- `skills/ui-qa/` is the only copy of the method, including native Codex metadata.
+- `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, and `agents/user-zero.md`
+  are generated plugin bindings. The agent is a pointer to the canonical persona,
+  rooted at the plugin cache, not a second evaluator implementation.
+- The product's profile, charters, calibration inputs, and `qa-output/` live in
+  the product workspace, never inside the plugin cache or personal skill folder.
+
+`./scripts/sync-platform-dirs.sh` also generates plugin bindings in this harness
+checkout. Product installations have no harness package source and retain the
+existing repository-local layout. JSON bindings have adjacent ownership markers;
+the generator refuses unowned files and symlinked output paths, preflighting
+all outputs before writing. Do not edit a generated file or its marker.
+
+After editing package identity, the generator, or the method:
+
+```bash
+./scripts/sync-platform-dirs.sh
+./scripts/check-platform-sync.sh
+./scripts/check-platform-sync.sh --from-index
+./tests/run-tests.sh
+claude plugin validate .
+claude plugin validate .claude-plugin/plugin.json
+```
+
+The staged-index check includes plugin catalogs, manifests, agent pointers, and
+ownership markers. A newly staged version with stale generated manifests fails
+even if the working tree has already been regenerated. Bump `plugin.json`'s
+version for a released package update, then regenerate and stage all bindings.
+
+### Updates and removal
+
+The standalone Codex skill installer refuses an already-existing destination.
+It is an initial install route, not the repository script's upgrade mechanism.
+To update, remove the installed `ui-qa` skill through your skill-management
+workflow, then reinstall the canonical GitHub path. Keep product files outside
+the installation so they survive removal. It is available on the next turn;
+restart the session if it is not discovered.
+
+For plugins, refresh the marketplace and use the host's plugin update controls.
+Codex CLI supports `codex plugin marketplace upgrade user-zero`; use the plugin
+browser to review available updates. Claude Code supports marketplace and plugin
+updates from `/plugin`. Do not edit files in a plugin cache. Uninstall only the
+plugin using the host's plugin manager; retain the product binding and evidence.
+
+A plugin supplies the server configuration, not Node, browser binaries, your
+application, or an approved profile. Start a new session after installation and
+verify the browser tools actually connect. Hosts may namespace tools differently;
+the runner binds the selected plugin's tools in its packet. The Claude plugin
+agent uses its plugin-server tool grant. Default browser exploration stays serial.
+
+### Compatibility evidence (2026-10-08)
+
+- Codex CLI 0.161.0: native plugin subcommands and local marketplace discovery
+  recognize `user-zero@user-zero` at version 0.1.0. Discovery was checked with
+  command-line configuration overrides; no personal plugin configuration changed.
+- Codex's bundled skill installer: the GitHub `skills/ui-qa` path successfully
+  installed into a temporary destination, including references, lenses, persona,
+  and run gate. The self-contained-copy test also covers explicit-invocation
+  metadata added to this package.
+- Claude Code 2.1.286: marketplace installation into an isolated configuration
+  succeeds. Component inventory detects one skill, one agent, and one MCP server
+  using the standard `agents/` discovery directory. An explicit agent file-path
+  override validated but produced an empty inventory in this version, so the
+  package uses standard discovery.
+- Claude's plugin-manifest validator warns that root `CLAUDE.md` is not loaded
+  as project context. That file documents this repository; the installed skill
+  and generated agent contain the plugin instructions.
+
+These are packaging and discovery checks, not a blind evaluator calibration or
+an end-to-end browser QA run. Browser-server startup and actual fresh-context
+Pass-A execution still require runtime verification. This is a Git/local
+marketplace package; it has not been submitted to a public plugin directory.
+
+Sources checked on the same date:
+[Codex skills](https://learn.chatgpt.com/docs/build-skills),
+[OpenAI plugin packaging](https://developers.openai.com/plugins/build/plugins),
+[Claude plugin manifests](https://code.claude.com/docs/en/plugins-reference), and
+[Claude marketplaces](https://code.claude.com/docs/en/plugin-marketplaces).

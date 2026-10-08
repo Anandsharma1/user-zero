@@ -1,0 +1,6 @@
+interface:
+  display_name: "ui-qa — human-style UI QA explorer"
+  short_description: "Review real UI journeys with screenshots and grounded findings."
+  default_prompt: "Use the ui-qa skill for the requested screen or charter, following its fresh-context and evidence rules."
+policy:
+  allow_implicit_invocation: false

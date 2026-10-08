@@ -1,0 +1,16 @@
+{
+  "name": "user-zero",
+  "owner": {
+    "name": "Anand Sharma"
+  },
+  "metadata": {
+    "description": "Browser-driven UI QA with fresh-eyes evaluation, screenshots, and grounded findings."
+  },
+  "plugins": [
+    {
+      "name": "user-zero",
+      "source": "./",
+      "description": "Browser-driven UI QA with fresh-eyes evaluation, screenshots, and grounded findings."
+    }
+  ]
+}

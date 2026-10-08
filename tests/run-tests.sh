@@ -849,6 +849,124 @@ t_fixture_presentation_repairs_are_detected() {
                     || no "presentation denominator" "a repaired concern remained armed or was not identified"
 }
 
+# ========================================================= plugin distribution
+
+t_plugin_package_routes_to_canonical_skill() {
+  run python3 - "$REPO" <<'PYCHECK' \
+    && ok "both plugin hosts use the canonical skill and pinned isolated browser" \
+    || no "plugin package" "manifest, marketplace, agent, or browser configuration is inconsistent"
+import json, pathlib, sys
+r = pathlib.Path(sys.argv[1])
+p = json.loads((r / 'plugin.json').read_text())
+c = json.loads((r / '.claude-plugin/plugin.json').read_text())
+x = json.loads((r / '.codex-plugin/plugin.json').read_text())
+assert p['name'] == c['name'] == x['name'] == 'user-zero'
+assert p['version'] == c['version'] == x['version']
+assert 'agents' not in c
+assert (r / 'agents/user-zero.md').is_file()
+assert x['skills'] == './skills/'
+assert c['mcpServers'] == x['mcpServers'] == './mcp.json'
+for catalog in ['.claude-plugin/marketplace.json', '.agents/plugins/marketplace.json']:
+    m = json.loads((r / catalog).read_text())
+    assert m['name'] == 'user-zero'
+    assert m['plugins'][0]['name'] == p['name']
+    source = m['plugins'][0]['source']
+    assert (source if isinstance(source, str) else source['path']) == './'
+server = json.loads((r / 'mcp.json').read_text())['mcpServers']['playwright']
+assert server['command'] == 'npx'
+assert server['args'] == ['-y', '@playwright/mcp@0.0.78', '--isolated']
+assert (r / 'skills/ui-qa/SKILL.md').is_file()
+agent = (r / 'agents/user-zero.md').read_text()
+assert '${CLAUDE_PLUGIN_ROOT}/skills/ui-qa/agents/user-zero.md' in agent
+assert 'mcp__plugin_user-zero_playwright' in agent
+assert 'Bash' not in agent.split('---')[1]
+PYCHECK
+}
+
+plugin_target() {
+  local t; t="$(fresh_target)"
+  cp -r "$REPO/scripts" "$REPO/skills" "$t/"
+  cp "$REPO/plugin.json" "$REPO/mcp.json" "$t/"
+  echo "$t"
+}
+
+t_plugin_generator_detects_drift() {
+  local t; t="$(plugin_target)"
+  run python3 "$t/scripts/sync-plugin-package.py" --root "$t" || { no "plugin generation" "initial generation failed"; return; }
+  run python3 "$t/scripts/sync-plugin-package.py" --root "$t" --check || { no "plugin check" "fresh generation rejected"; return; }
+  sed -i 's/0.1.0/9.9.9/' "$t/.claude-plugin/plugin.json"
+  run python3 "$t/scripts/sync-plugin-package.py" --root "$t" --check \
+    && no "plugin drift" "edited manifest passed" \
+    || ok "plugin check detects a generated manifest edited by hand"
+}
+
+t_plugin_generator_refuses_unowned_file() {
+  local t; t="$(plugin_target)"
+  mkdir -p "$t/.claude-plugin"
+  echo SENTINEL > "$t/.claude-plugin/plugin.json"
+  run python3 "$t/scripts/sync-plugin-package.py" --root "$t"
+  local rc=$?
+  if [ "$rc" -ne 0 ] && [ "$(cat "$t/.claude-plugin/plugin.json")" = SENTINEL ] && [ ! -e "$t/.agents/plugins/marketplace.json" ]; then
+    ok "plugin generator preflights ownership before any writes"
+  else no "plugin ownership" "unowned metadata was overwritten or partial writes occurred"; fi
+}
+
+t_plugin_generator_rejects_symlink() {
+  local t; t="$(plugin_target)"
+  mkdir -p "$t/victim"
+  echo SENTINEL > "$t/victim/plugin.json"
+  ln -s "$t/victim" "$t/.claude-plugin"
+  run python3 "$t/scripts/sync-plugin-package.py" --root "$t"
+  local rc=$?
+  if [ "$rc" -ne 0 ] && [ "$(cat "$t/victim/plugin.json")" = SENTINEL ]; then
+    ok "plugin generator refuses symlinked output directories"
+  else no "plugin containment" "generation reached a symlink target"; fi
+}
+
+t_install_preserves_product_plugin() {
+  local t; t="$(fresh_target)"
+  printf '{"name":"product-plugin"}\n' > "$t/plugin.json"
+  mkdir -p "$t/.claude-plugin" "$t/agents"
+  echo SENTINEL > "$t/.claude-plugin/plugin.json"
+  echo SENTINEL > "$t/agents/product-agent.md"
+  run "$REPO/scripts/install.sh" "$t"
+  local rc=$?
+  if [ "$rc" -eq 0 ] && grep -q 'product-plugin' "$t/plugin.json" && [ "$(cat "$t/.claude-plugin/plugin.json")" = SENTINEL ] && run "$REPO/scripts/check-platform-sync.sh" --root "$t"; then
+    ok "repository installer preserves an unrelated product plugin"
+  else no "product plugin" "install failed or changed unrelated plugin metadata"; fi
+}
+
+t_native_skill_copy_is_self_contained() {
+  local t; t="$WORK/native-skill"; mkdir -p "$t"
+  cp -r "$REPO/skills/ui-qa" "$t/ui-qa"
+  run python3 - "$t/ui-qa" <<'PYCHECK' \
+    && ok "native skill copy contains references, run gate, and explicit-invocation metadata" \
+    || no "native skill" "installation would depend on repository pointers"
+from pathlib import Path
+import re, sys
+r = Path(sys.argv[1])
+assert '(pointer)' not in (r / 'SKILL.md').read_text()
+assert 'allow_implicit_invocation: false' in (r / 'agents/openai.yaml').read_text()
+for file in r.rglob('*.md'):
+    for ref in re.findall(r'(?:references|lenses|adapters|agents|scripts)/[a-zA-Z0-9._-]+\.(?:md|sh|yaml|py)',file.read_text()):
+        assert (r / ref).is_file(), ref
+PYCHECK
+}
+
+t_plugin_from_index_detects_partial_staging() {
+  local t; t="$(plugin_target)"
+  run "$t/scripts/sync-platform-dirs.sh" --root "$t" || { no "plugin baseline" "sync failed"; return; }
+  git -C "$t" add -A
+  git -C "$t" -c user.email=t@t -c user.name=t commit -qm base
+  sed -i 's/0.1.0/0.2.0/' "$t/plugin.json"
+  git -C "$t" add plugin.json
+  run "$t/scripts/sync-platform-dirs.sh" --root "$t"
+  run "$t/scripts/check-platform-sync.sh" --root "$t" || { no "plugin worktree" "regenerated worktree rejected"; return; }
+  run "$t/scripts/check-platform-sync.sh" --root "$t" --from-index \
+    && no "plugin partial staging" "staged identity passed with stale manifests" \
+    || ok "staged-index check catches stale plugin metadata despite a synced worktree"
+}
+
 # ============================================================ layer purity
 
 t_layer1_has_no_product_strings() {
@@ -921,6 +1039,10 @@ for t in \
   t_fixture_serve_refuses_if_key_inside t_fixture_served_files_have_no_comments \
   t_fixture_clean_app_has_no_seeded_probes t_fixture_probe_detects_drift \
   t_fixture_probe_detects_repair t_fixture_presentation_repairs_are_detected \
+  t_plugin_package_routes_to_canonical_skill t_plugin_generator_detects_drift \
+  t_plugin_generator_refuses_unowned_file t_plugin_generator_rejects_symlink \
+  t_plugin_from_index_detects_partial_staging t_install_preserves_product_plugin \
+  t_native_skill_copy_is_self_contained \
   t_layer1_has_no_product_strings t_purity_hook_scans_staged_content \
   t_all_skill_refs_resolve; do
   "$t"

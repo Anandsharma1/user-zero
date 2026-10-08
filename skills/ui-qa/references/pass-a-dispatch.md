@@ -37,6 +37,15 @@ what makes it the correct mechanism — the packet must be that prompt.
 - One charter per dispatch. Reusing a subagent for a second charter carries the
   first charter's screens into the second's fresh eyes.
 
+**Claude plugin installation.** Use the plugin's namespaced `user-zero` agent,
+whose generated entry point resolves method files from the plugin root. Supply
+only the Pass-A packet, with product and evidence locations resolved by the
+runner. Include the absolute installed skill directory as `method_root` so
+method reads still resolve if the host does not expand its plugin-root token.
+Do not use a repository-relative agent pointer from the plugin cache.
+The plugin agent's tool grant is Read, Write, and its bundled browser server;
+verify these tools are available before dispatch.
+
 **Codex.** Dispatch a fresh explorer whose entire prompt is
 `agents/user-zero.md` plus the packet. Do not run Pass A in the session that
 authored the charter or read the profile — start a new one. Where the harness

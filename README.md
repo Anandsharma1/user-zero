@@ -365,10 +365,11 @@ you.
 | `scripts/install.sh` | install or upgrade into a product repo |
 | `scripts/uninstall.sh` | remove it again, keeping your work |
 | `scripts/sync-platform-dirs.sh` | regenerate the small per-tool pointer files |
-| `scripts/check-platform-sync.sh` | fail if those pointers drift |
+| `scripts/check-platform-sync.sh` | fail if those pointers or plugin bindings drift |
+| `scripts/sync-plugin-package.py` | derive plugin manifests, catalogs, and the Claude agent entry point |
 | `skills/ui-qa/scripts/verify-run.sh` | the post-run check from step 7 |
 | `fixtures/serve.sh`, `fixtures/probe.sh` | the practice app and its bug checker |
-| `tests/run-tests.sh` | 83 tests for all of the above |
+| `tests/run-tests.sh` | 90 tests for all of the above |
 
 ---
 
@@ -387,11 +388,86 @@ you.
 
 ## Installation
 
+Choose one route per host:
+
+| Route | What it installs | Product setup |
+|---|---|---|
+| Codex skill installer | Personal `ui-qa` skill, references, lenses, and run gate | Register the browser separately; full runs need a profile and charters |
+| Codex or Claude Code plugin | The same canonical skill plus pinned browser configuration; Claude also gets the evaluator agent | `glance` needs an app URL; full runs need a profile and charters |
+| Repository script | Harness files, platform pointers, and product profile/charter templates in your repo | Register the browser and fill in the product binding |
+
+**Codex: paste this into a conversation** (not your shell):
+
+```text
+$skill-installer install https://github.com/Anandsharma1/user-zero/tree/main/skills/ui-qa
+```
+
+Install the canonical `skills/ui-qa` directory, not a generated platform pointer.
+It includes all method dependencies and explicit-invocation metadata. On the
+next turn, use `$ui-qa glance <url>`; restart Codex if it has not appeared. To
+register the browser for this standalone route:
+
+```bash
+codex mcp add playwright -- npx -y @playwright/mcp@0.0.78 --isolated
+```
+
+**Codex plugin** (CLI versions with `codex plugin add`):
+
+```bash
+codex plugin marketplace add Anandsharma1/user-zero
+codex plugin add user-zero@user-zero
+```
+
+In the desktop app, add the marketplace and install its `user-zero` entry from
+the plugin browser. Start a new session, select the plugin's `ui-qa` skill, and
+ask for `glance <url>` or a charter. The package bundles the browser server;
+verify it connects rather than registering a second copy.
+
+**Claude Code plugin**, from your shell:
+
+```bash
+claude plugin marketplace add Anandsharma1/user-zero
+claude plugin install user-zero@user-zero
+```
+
+The install command defaults to **user scope**: the plugin is available to you
+across all projects on this machine. To limit it to a project, run the command
+from that product repository with one of these explicit scopes:
+
+| Scope | Install command | Enabled in |
+|---|---|---|
+| User (default) | `claude plugin install user-zero@user-zero --scope user` | `~/.claude/settings.json` |
+| Project, shared with collaborators | `claude plugin install user-zero@user-zero --scope project` | `.claude/settings.json` |
+| Only you, only this project | `claude plugin install user-zero@user-zero --scope local` | `.claude/settings.local.json` |
+
+Commit project-scope settings to share the configuration. Each collaborator
+still needs to install the plugin on their machine. Scope controls where the
+plugin is enabled; the plugin files remain in Claude Code's managed cache.
+See [Claude Code installation scopes](https://code.claude.com/docs/en/discover-plugins#choose-an-install-scope).
+
+Start a new session and use `/user-zero:ui-qa glance <url>`. The plugin also
+registers the `user-zero` evaluator agent and the Playwright server. Browser
+approval and a usable browser installation are still required. Full runs follow
+the same fresh-context, profile, charter, and isolation rules.
+
+**Repository-local install**, for scaffolded product bindings:
+
 ```bash
 ./scripts/install.sh /path/to/your-product-repo
 ```
 
-Options:
+Plugin and skill installation do not automatically start your application,
+create an approved product profile, or grant product-readiness authority. Keep
+product profiles, charters, and evidence in your product workspace; keep the
+installed method in its skill or plugin directory.
+
+See [docs/OPERATIONS.md](docs/OPERATIONS.md#native-skill-and-plugin-installation)
+for upgrades, removal, local package validation, and compatibility evidence.
+Native mechanisms: [Codex skills](https://learn.chatgpt.com/docs/build-skills),
+[OpenAI plugin packaging](https://developers.openai.com/plugins/build/plugins),
+and [Claude Code plugins](https://code.claude.com/docs/en/plugins).
+
+Repository installer options:
 
 | Option | Default | What it does |
 |---|---|---|
@@ -531,7 +607,7 @@ read the answers — and tests enforce both. See
 ./scripts/install-git-hooks.sh                 # pre-commit checks
 ./scripts/sync-platform-dirs.sh                # after editing skills/ui-qa/
 ./scripts/check-platform-sync.sh --from-index  # verify what git will commit
-./tests/run-tests.sh                           # 83 tests, no dependencies
+./tests/run-tests.sh                           # 90 tests, no dependencies
 ```
 
 Two rules: edit only `skills/ui-qa/` (everything under `.claude/`, `.codex/`,

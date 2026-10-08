@@ -59,6 +59,16 @@ else
   for d in .claude .codex .agents .cursor .gemini; do
     [ -d "$ROOT/$d" ] && cp -r "$ROOT/$d" "$ACTUAL/$d"
   done
+  if [ -f "$ROOT/plugin.json" ] && [ -f "$ROOT/scripts/sync-plugin-package.py" ]; then
+    for f in plugin.json mcp.json; do
+      [ ! -e "$ROOT/$f" ] || cp "$ROOT/$f" "$ACTUAL/$f"
+    done
+    mkdir -p "$ACTUAL/scripts"
+    cp "$ROOT/scripts/sync-plugin-package.py" "$ACTUAL/scripts/"
+    for d in .claude-plugin .codex-plugin agents; do
+      [ ! -d "$ROOT/$d" ] || cp -r "$ROOT/$d" "$ACTUAL/$d"
+    done
+  fi
   SOURCE_LABEL="working tree"
 fi
 
@@ -68,6 +78,15 @@ fi
 # Generate from the same canonical content the actual tree carries.
 mkdir -p "$EXPECT/$(dirname "$BASE")"
 cp -r "$ACTUAL/$BASE" "$EXPECT/$BASE"
+CHECK_DIRS=".claude .codex .agents .cursor .gemini"
+if [ -f "$ACTUAL/plugin.json" ] && [ -f "$ACTUAL/scripts/sync-plugin-package.py" ]; then
+  for f in plugin.json mcp.json; do
+    [ ! -e "$ACTUAL/$f" ] || cp "$ACTUAL/$f" "$EXPECT/$f"
+  done
+  mkdir -p "$EXPECT/scripts"
+  cp "$ACTUAL/scripts/sync-plugin-package.py" "$EXPECT/scripts/"
+  CHECK_DIRS="$CHECK_DIRS .claude-plugin .codex-plugin agents"
+fi
 
 # ...using the generator from that same tree. Under --from-index, running the
 # working-tree generator would compare staged content against an UNSTAGED
@@ -90,7 +109,7 @@ fi
 # what makes a wrong --platforms value fail loudly instead of silently
 # skipping the dirs it did not generate.
 status=0
-for d in .claude .codex .agents .cursor .gemini; do
+for d in $CHECK_DIRS; do
   a="$ACTUAL/$d"; e="$EXPECT/$d"
   [ -d "$a" ] || [ -d "$e" ] || continue
   mkdir -p "$a" "$e"

@@ -7,7 +7,11 @@ description: Human-style product QA explorer. Drives the real application UI in 
 
 This skill is the **portable core**: pure method, no project content. Every
 path below is relative to this skill's own root directory, wherever it is
-installed.
+installed. Resolve method files and gate scripts from that installed root;
+resolve product routes, profiles, charters, and `qa-output/` from the product
+workspace. A cached plugin or personal skill is not installed in that workspace.
+Plugin hosts may namespace the invocation; use the discovered skill name with
+the same arguments below.
 
 Everything project-specific lives outside the skill in the project's explorer
 directory (default `qa/product-explorer/`), which contains:

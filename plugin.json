@@ -1,0 +1,11 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "user-zero",
+  "version": "0.1.0",
+  "description": "Browser-driven UI QA with fresh-eyes evaluation, screenshots, and grounded findings.",
+  "author": { "name": "Anand Sharma" },
+  "homepage": "https://github.com/Anandsharma1/user-zero",
+  "repository": "https://github.com/Anandsharma1/user-zero",
+  "license": "MIT",
+  "keywords": ["ui", "qa", "ux", "browser"]
+}

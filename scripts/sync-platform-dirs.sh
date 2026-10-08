@@ -313,6 +313,12 @@ for p in claude codex cursor gemini; do
   [ "$pruned" -eq 1 ] && echo "sync: pruned obsolete $p stubs"
 done
 
+# A distributable plugin lives only in the harness repo. Product installations
+# have no root plugin.json, so they keep the existing repository-local layout.
+if [ -f "$ROOT/plugin.json" ] && [ -f "$ROOT/scripts/sync-plugin-package.py" ] && [ "$BASE" = "skills/ui-qa" ]; then
+  python3 "$HERE/sync-plugin-package.py" --root "$ROOT"
+fi
+
 if [ "$REFUSED" -gt 0 ]; then
   echo "sync: FAILED — $REFUSED path(s) left untouched because they are not ours." >&2
   echo "      Nothing was overwritten or deleted. Resolve those paths, then re-run." >&2

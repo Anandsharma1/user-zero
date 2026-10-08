@@ -28,7 +28,7 @@ purpose, and the blindness test that was supposed to catch them grepped only for
 **a fix applied to one instance of a class leaves the other instances**, and a
 test written against the defect you imagined does not cover the one you shipped.
 
-The tooling now has an 83-test suite covering every hole four review rounds
+The tooling now has a 90-test suite covering every hole four review rounds
 found by hand — installer containment and ownership-gated deletion, symlink-safe
 writes, staged-index correctness, platform pruning, fixture integrity, and
 nineteen distinct false-green paths in the run gate. Three rounds each found real
@@ -66,7 +66,7 @@ P0s.
 | Layer-1 purity | automated: no machine or product paths in `skills/` or `templates/`; every intra-skill reference resolves |
 | Adapter tool caveats | measured by hand on Playwright MCP 0.0.78 (2026-07-31), with the probe results recorded |
 
-`tests/run-tests.sh` — 83 tests, no dependencies. Every one exists because a
+`tests/run-tests.sh` — 90 tests, no dependencies. Every one exists because a
 reviewer found the corresponding hole by hand.
 
 ## What has NOT been verified
@@ -110,6 +110,17 @@ maintainer approval. Family-specific rediscovery and rejected-actionable-finding
 bars supplement aggregate calibration. None of these changes has been tested
 in a blind evaluator run; a tooling pass proves fixture integrity, not improved
 UX judgment. Approval, blind repeat runs, and repair-lift remain unmeasured.
+
+## Native distribution additions (2026-10-08)
+
+Codex can install the canonical skill directly from GitHub. The package also
+has generated Codex and Claude plugin bindings and catalogs, using the same
+skill directory and pinned browser configuration. Claude local installation and
+component discovery, and Codex local marketplace discovery, have been checked;
+versions, dates, and scope are recorded in `docs/OPERATIONS.md`. Automated tests
+cover package routing, native-copy dependencies, ownership, symlink containment,
+product-plugin preservation, and staged-index drift. A runtime browser session
+through an installed plugin and a blind Pass-A run remain unverified.
 
 ## Where enforcement is prose, not code
 

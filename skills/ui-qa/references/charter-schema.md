@@ -89,6 +89,7 @@ Contamination boundary: if it is not in this list, Pass A does not get it.
 | `viewports` | name + pixel dimensions for each declared viewport | profile §Adapter & viewports |
 | `coverage_rows` | the required coverage matrix rows, derived by the runner — the explorer fills them in, it does not choose its own denominator | `references/coverage-contract.md` |
 | `evidence_dir` | where to write the report and screenshots | runner |
+| `method_root` | absolute installed skill directory, resolved from the host's discovered skill location; never inferred from the product working directory | runner |
 | `adapter` | the browser adapter's tool instructions | adapter file |
 | `conduct` | destructive-git prohibition; browser + evidence-writing tools only | skill |
 

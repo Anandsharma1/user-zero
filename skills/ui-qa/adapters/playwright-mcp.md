@@ -43,6 +43,15 @@ codex mcp list                            # verify it actually registered
   server) before the tools appear. Verify the tools are actually present
   before starting a run — do not assume from the config file.
 
+## Plugin binding
+
+When installed as a plugin, the package supplies the same pinned, isolated
+server configuration. Hosts may namespace the server and its tool names; bind
+the capability mapping below to that plugin's Playwright tools rather than a
+second manually configured browser. Confirm the discovered tool names in the
+mission packet. The isolation, serialization, teardown, and sensing rules remain
+the same. A standalone skill installation still needs manual MCP registration.
+
 ## Concurrency
 
 One MCP server connection provides **one** browser context. Subagents of a
