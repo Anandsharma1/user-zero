@@ -1,6 +1,6 @@
 # Known limitations and maturity status
 
-Last updated 2026-08-03, after two rounds of multi-reviewer audit.
+Last updated 2026-10-08, including presentation-review method and fixture additions.
 
 > An earlier version of this repo's summary said "the tooling is tested; the
 > evaluator isn't." That was too kind to the tooling: the second review found a
@@ -28,7 +28,7 @@ purpose, and the blindness test that was supposed to catch them grepped only for
 **a fix applied to one instance of a class leaves the other instances**, and a
 test written against the defect you imagined does not cover the one you shipped.
 
-The tooling now has a 82-test suite covering every hole four review rounds
+The tooling now has an 83-test suite covering every hole four review rounds
 found by hand — installer containment and ownership-gated deletion, symlink-safe
 writes, staged-index correctness, platform pruning, fixture integrity, and
 nineteen distinct false-green paths in the run gate. Three rounds each found real
@@ -66,7 +66,7 @@ P0s.
 | Layer-1 purity | automated: no machine or product paths in `skills/` or `templates/`; every intra-skill reference resolves |
 | Adapter tool caveats | measured by hand on Playwright MCP 0.0.78 (2026-07-31), with the probe results recorded |
 
-`tests/run-tests.sh` — 82 tests, no dependencies. Every one exists because a
+`tests/run-tests.sh` — 83 tests, no dependencies. Every one exists because a
 reviewer found the corresponding hole by hand.
 
 ## What has NOT been verified
@@ -83,8 +83,8 @@ This is the important half.
    are targets nobody has hit yet. Rediscovery, false-positive rate, and
    run-to-run stability are all **unknown**.
 3. **Fixtures now exist; no calibration has been run against them.**
-   `fixtures/` ships a deliberately broken two-page app (28 armed controls
-   across 11 defect classes, machine-verified by `fixtures/probe.sh`), a curated
+   `fixtures/` ships a deliberately broken three-page app (32 armed controls
+   across 13 defect classes, machine-verified by `fixtures/probe.sh`), a curated
    clean app as positive control, an approved profile, two charters, and both
    calibration input files. Everything needed for a first blind calibration is
    in place — the run itself has not happened, so rediscovery, false-positive
@@ -94,6 +94,22 @@ This is the important half.
    and teardown. Today those are executed by an agent following prose. Two
    pieces are real code — `scripts/verify-run.sh` (the post-run gate) and the
    sync/check tooling — and the rest is not.
+
+## Presentation-review additions (2026-10-08)
+
+The evaluator now explicitly opens and examines screenshots and records a
+visual-and-copy review, including no-concern and blocked outcomes. The taxonomy
+asks directly about displaced content, competing borders, verbosity, irrelevant
+implementation detail, and subtraction. Its word count remains within the
+previous spine budget. The record's completeness and actual image inspection
+are prose requirements; the run gate does not validate them.
+
+Four new armed controls cover presentation/layout and presentation/copy.
+Accepted counterpart pages are provided as **candidate exemplars**, pending
+maintainer approval. Family-specific rediscovery and rejected-actionable-finding
+bars supplement aggregate calibration. None of these changes has been tested
+in a blind evaluator run; a tooling pass proves fixture integrity, not improved
+UX judgment. Approval, blind repeat runs, and repair-lift remain unmeasured.
 
 ## Where enforcement is prose, not code
 
@@ -113,6 +129,7 @@ mean the same thing everywhere:
 | Isolation class / snapshot verification | **prose** — the profile supplies the mechanism, an agent runs it |
 | Blind calibration | **prose** — an operator discipline, unenforceable by tooling |
 | Suppression checks | **prose** |
+| Visual-and-copy review completeness and image inspection | **prose** — report table reviewed by the runner; no run-gate enforcement |
 
 An agent following prose is not nothing, but it is not a guarantee, and a
 reader deciding whether to trust a run should know which kind of assurance each

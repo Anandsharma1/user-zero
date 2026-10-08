@@ -12,10 +12,10 @@ calibration only** — never for a product-readiness claim about anything.
 
 ## 1. Product summary
 
-A two-page static web app that imitates a portfolio reconciliation console: a
+A three-page static web app that imitates a portfolio reconciliation console: a
 dashboard of summary cards and a positions table, plus an operations queue with
-an escalation form. It has no backend, no persistence and no authentication; it
-exists so the evaluator can be measured against defects whose presence is known.
+an escalation form and a review workspace. It has no backend, no persistence
+and no authentication; it exists so the evaluator can be measured against defects whose presence is known.
 
 - **Frontend origin the explorer drives:** printed by `fixtures/serve.sh`
   (a free port from 8801 on 127.0.0.1)

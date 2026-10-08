@@ -309,7 +309,7 @@ The harness repo ships its own corpus, so a first calibration needs no product:
 
 ```bash
 fixtures/serve.sh &                  # note the printed origin
-fixtures/probe.sh                    # all 28 controls must report ARMED
+fixtures/probe.sh                    # all 32 controls must report ARMED
 # in a session that has NOT read fixtures/controls.tsv:
 /ui-qa fixture-dashboard --calibrate
 /ui-qa fixture-dashboard --calibrate # second run, for consistency
@@ -454,7 +454,7 @@ Left for you, because they are your files: the MCP registration, the line in
 ./scripts/install-git-hooks.sh                   # pre-commit: staged-index sync + purity scan
 ./scripts/sync-platform-dirs.sh                  # after editing skills/ui-qa/
 ./scripts/check-platform-sync.sh --from-index    # what the hook runs
-./tests/run-tests.sh [-v]                        # 82 tests, no dependencies
+./tests/run-tests.sh [-v]                        # 83 tests, no dependencies
 ```
 
 Rules for contributors:

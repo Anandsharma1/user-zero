@@ -58,6 +58,39 @@ recursively DELETES. Never point the stack runner at `qa-output/` — the
 completed report must survive teardown. A compliant runner refuses a stack
 dir inside `qa-output/`.
 
+## Visual-and-copy review (Pass A and glance)
+
+After walking the task, open and examine screenshots of each money screen
+(the screens carrying the task's main decision or action) at every declared
+viewport and exercised theme. Glance applies this to its important screens
+and requested viewports. Inspect the initial viewport before scrolling;
+inspect the remaining content too. Record this table in `pass-a-report.md`
+(or `glance.md`), before finalizing it:
+
+| Route + state | Viewport + theme | Screenshot references | Attention | Space | Wording | Decoration | Subtraction |
+|---|---|---|---|---|---|---|---|
+
+Each review cell records a concrete concern with a finding ID, or a short
+reason for **no concern observed**; use **blocked — reason** if inspection
+was unavailable. No finding quota. Review:
+
+- **Attention:** what draws the eye first; does it serve the persona's task?
+- **Space:** what displaces or squeezes needed content, forces scrolling, or
+  prevents comparison? Whitespace serving readability or grouping earns space.
+- **Wording:** what requires unnecessary reading or implementation knowledge?
+  Inspect labels, helper text, banners, tooltips, and exercised error states.
+- **Decoration:** do borders, shadows, or nested frames compete with content,
+  distort grouping, or make static information look interactive?
+- **Subtraction:** what could be removed, shortened, or disclosed later while
+  preserving task guidance? Something unexercised is not thereby unnecessary.
+
+This records review effort, not a usability score or proof of good design.
+The runner checks the table for missing screen/viewport/theme reviews before
+accepting Pass A. The current run gate does **not** validate these table cells
+or whether the evaluator actually inspected an image; enforcement is prose
+and reviewer inspection, as with screenshot meaning in the coverage matrix.
+Do not infer visual quality from the accessibility tree alone.
+
 ## Finding record (every finding, all three classes)
 
 | Field | Content |
@@ -80,6 +113,21 @@ dir inside `qa-output/`.
 Calibration example of the bar: not "the scorecard looks untrustworthy" but
 "the scorecard leads with an aggregate percentage before showing it is based
 on one recommendation, creating false confidence."
+
+**Presentation recommendations must name the change and its benefit.**
+"Reduce padding", "use thinner borders", and "simplify the text" alone are
+insufficient. Identify the region, the observed effect at the stated viewport,
+what to change, and what necessary information or affordance to preserve.
+For copy, quote the exact visible phrase and propose a replacement; do not
+invent promises, hide uncertainty, or remove required warnings. For example:
+"Shorten the repeated introduction to one sentence and disclose setup details
+on demand so the first actionable row appears in the initial laptop viewport;
+retain the pre-submission warning."
+
+Technical language useful to the persona is not an internal-information leak.
+Distinguish irrelevant implementation detail (usually an experience opportunity)
+from exposed secrets or private data (a product defect). Mere stylistic
+preference without a demonstrated effect belongs in observations.
 
 **Every finding carries a `class` AND a `severity` from that class's own
 vocabulary.** Both are mandatory, because the run report is the only input the

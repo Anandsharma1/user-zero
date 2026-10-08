@@ -1,27 +1,16 @@
 # UX Evaluation Taxonomy — the expert question catalog (the spine)
 
-This is the full question set behind the charter rubric's dimensions —
-what a senior UX evaluator / heuristic reviewer actually checks, distilled
-from the field's canonical frameworks: Nielsen's 10 usability heuristics,
-Norman's design principles (affordances/signifiers/feedback/mapping),
-ISO 9241-110 dialogue principles, Gestalt perception principles, WCAG,
-Fitts's & Hick's laws, and the component-selection guidance of the major
-design systems (Material, Apple HIG, Carbon, Polaris).
+The always-loaded **spine**, distilled from Nielsen, Norman, ISO 9241-110,
+Gestalt, WCAG, Fitts/Hick, and component guidance from Material, Apple HIG,
+Carbon, and Polaris. Keep it compact enough for fresh-eyes evaluation.
 
-This file is **method, not product knowledge** — it is part of the
-evaluator's own expertise and therefore allowed in Pass A. It never contains
-project-specific expectations (those live in profiles/charters, Pass B only).
+This is **method, not product knowledge**, allowed in Pass A. Product
+expectations belong in Pass B. Specialized concerns live in `../lenses/`;
+see `../lenses/MANIFEST.md`.
 
-It is the **spine**: always loaded, deliberately condensed so it fits a
-fresh-eyes context alongside the mission packet. Concerns that only some
-products have — AI/generative surfaces, localization, touch, motion,
-persuasion patterns — live in `../lenses/` and are loaded per charter. See
-`../lenses/MANIFEST.md`.
-
-Every question is asked as the charter's persona, on the real rendered
-screen, with a screenshot for any claim. Not every question applies to every
-screen — the evaluator's judgment about which questions matter *here* is the
-skill being exercised.
+Ask applicable questions as the charter's persona, from the rendered UI,
+with screenshots for claims. Judgment about what matters here is part of
+expertise; no question requires manufacturing a finding.
 
 ---
 
@@ -50,10 +39,11 @@ skill being exercised.
 - Progressive disclosure: is secondary detail collapsed/expandable rather
   than competing with the primary content? Is anything important hidden one
   click too deep — or anything trivial promoted?
-- Density calibration: dashboards and tables may be dense; forms and
-  first-run screens should breathe. Is the density right for THIS screen's
-  job and persona? Flag both cramped (scanning fails) and sparse (pointless
-  scrolling, "prose over dead space").
+- Density: can the persona scan and compare what the task needs? Flag both
+  cramped content and sparse layouts that force pointless scrolling.
+- Subtraction: what could be removed, shortened, or disclosed later to make
+  this task clearer without losing needed guidance? Non-use alone is no reason
+  to remove something.
 - Heading quality: does every page/section heading say what the section IS
   in the persona's words (not an internal feature name)? Would the heading
   alone let a user decide whether to read the section?
@@ -145,18 +135,20 @@ data shape and task?* Common wrong-pattern smells:
   adequate spacing between adjacent targets, ESPECIALLY safe vs destructive.
 - Above-the-fold priority: at each declared viewport, is the screen's #1
   job visible and actionable without scrolling?
-- Real-estate utilization: no large dead regions while content is
-  strangled elsewhere; content width caps for readability (body text
-  ~45–75 characters per line); the layout uses width growth for MORE
-  information, not just wider gaps.
+- Real estate: do headers, padding, sidebars, or repeated summaries push
+  task-critical content out of view or squeeze comparison columns? Wider
+  viewports should reveal useful content, not just wider gaps. Keep prose
+  readable (~45–75 characters per line); whitespace can serve grouping.
 - Component proportionality: control sizes match their importance —
   a primary action isn't a tiny link; a rarely-used option isn't a huge
   button.
 
 ## 8. Typography, color & theme
 
-- Typographic hierarchy: distinct, consistent levels (page title, section,
-  body, caption); no two-levels-look-identical, no six competing sizes.
+- Typography: clear, consistent title, section, body, and caption levels.
+- Borders and decoration: do thick, high-contrast, or nested boundaries
+  overpower content, imply wrong grouping, or make static content look
+  interactive? Judge their effect, not a universal thickness limit.
 - Contrast meets WCAG AA (4.5:1 body, 3:1 large text/UI); check BOTH themes
   if the product ships more than one, and check state colors (disabled,
   placeholder) which fail most often.
@@ -183,8 +175,12 @@ data shape and task?* Common wrong-pattern smells:
 
 ## 10. Language & microcopy
 
-- Persona's vocabulary, not the data model's (no enum tokens, no internal
-  jargon, no raw identifiers where names belong).
+- Vocabulary: can this persona understand the screen using task knowledge,
+  without knowing the implementation? Technical terms belong when the task
+  needs them; enum tokens and raw IDs must not substitute for useful labels.
+- Brevity: does each explanation help decide or act? Name repeated prose or
+  implementation detail to shorten or disclose later; preserve warnings,
+  necessary guidance, and recovery steps.
 - Consistent terminology: one concept = one word everywhere (a "run" here
   isn't a "job" there); consistent casing convention.
 - Labels over placeholders (placeholders vanish on input); dates/numbers/

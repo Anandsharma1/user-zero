@@ -131,6 +131,20 @@ This is not a screenshot review. Glance drives the app the way a tester would:
 Reload-and-check counts as UI evidence: if you save something, come back, and it
 is gone, that is a finding glance can make on its own.
 
+## Visual-and-copy review during development
+
+After exercising the UI, examine screenshots of the important screens at each
+requested viewport and exercised theme. Record the visual-and-copy review table
+from `references/evidence-schema.md` in `glance.md`, including **no concern
+observed** with a reason where appropriate. Inspect attention, space, wording,
+decoration, and possible subtraction; capture alone does not count. A blocked
+image inspection is stated, not replaced by an accessibility-tree judgment.
+
+Use this review while new screens are changing, then re-run after improvements.
+It adds no readiness authority. Broader journeys and correctness questions still
+need charters. Ordinary density, useful technical terms, and deliberate visual
+boundaries are not findings merely because they exist.
+
 ## What it can and cannot say about data
 
 This is the distinction that matters, and it is not "no data checking".

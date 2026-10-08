@@ -37,7 +37,7 @@ evaluator looks for; they never multiply the reports.
 | Lens | Load when the surface… | Adds |
 |---|---|---|
 | `ai-product-ux` | contains model-generated output, chat, agents, recommendations, or confidence-bearing predictions | provenance, confidence honesty, steerability, correction paths, streaming states, automation-boundary clarity |
-| `simplicity-and-restraint` | has grown by accretion, or a redesign is being judged | subtractive critique: what should not be here at all |
+| `simplicity-and-restraint` | has grown by accretion, is being redesigned, or has competing summaries, repeated explanations, or prominent implementation metadata | subtractive critique: what should not be here at all |
 | `persuasion-and-dark-patterns` | asks for money, consent, personal data, or a commitment | pressure tactics, asymmetric choice, consent honesty, deceptive defaults |
 | `localization-and-locale` | ships in more than one language/region, or renders locale-formatted data | expansion, RTL, name/address/number/currency/timezone honesty |
 | `touch-and-mobile` | is used on phones or tablets, or declares a small viewport | thumb reach, gesture discoverability, native-convention conformance, interruption tolerance |

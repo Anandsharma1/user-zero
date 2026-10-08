@@ -48,3 +48,7 @@ KD-E01	state honesty	broken-app/queue.html	>No records.<	-	An empty state says o
 KD-R01	forms	broken-app/queue.html	addEventListener('input'	-	Validation fires on every keystroke, the error text is generic and far from the fields, and a failed submit clears every value the user typed.
 KD-R02	forms	broken-app/queue.html	class="primary" disabled	aria-describedby	A disabled action gives no explanation of what would enable it.
 KD-R03	forms	broken-app/queue.html	placeholder="Settlement date"	<label for=	Fields rely on placeholders instead of persistent labels, and a date is a free-text box with no format guidance.
+KD-V05	presentation/layout	broken-app/workspace.html	padding:160px 48px	-	The introductory panel consumes the initial laptop viewport and pushes actionable rows below it despite little useful introductory content.
+KD-V06	presentation/layout	broken-app/workspace.html	border:8px solid #202124	-	Heavy nested frames around the positions table dominate the thin text and draw attention away from the review actions.
+KD-L04	presentation/copy	broken-app/workspace.html	Each Review link begins the review	-	The introduction repeatedly explains the same Review action, requiring unnecessary reading before reaching the positions.
+KD-L05	presentation/copy	broken-app/workspace.html	hydration boundary	-	Help text explains routing and rendering internals that do not help the operations persona choose or review a position.

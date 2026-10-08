@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review workspace</title>
+<style>
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.5 system-ui,sans-serif; color:#202124; background:#fff; }
+  header { padding:16px 24px; border-bottom:1px solid #d5d7da; }
+  a { color:#1745b5; }
+  main { padding:24px; max-width:1100px; }
+  h1 { margin:0 0 12px; font-size:26px; }
+  h2 { margin:0 0 12px; font-size:20px; }
+  .intro { padding:160px 48px; background:#f5f6f8; margin-bottom:24px; }
+  .intro p { max-width:65ch; margin:0; }
+  .batch { border:8px solid #202124; padding:16px; }
+  .rows { border:6px solid #202124; padding:12px; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:12px 8px; border-bottom:1px solid #d5d7da; }
+  caption { text-align:left; margin-bottom:8px; }
+  .help { max-width:65ch; }
+  :focus-visible { outline:3px solid #1745b5; outline-offset:3px; }
+  @media (max-width:640px) { main { padding:16px; } .intro { padding:110px 24px; } .rows { overflow-x:auto; } th,td { white-space:nowrap; } }
+</style>
+</head>
+<body>
+<header><a href="index.html">Back to positions</a></header>
+<main>
+<h1>Review workspace</h1>
+<section class="intro">
+<h2>About your review workspace</h2>
+<p>This workspace provides a place where you can review positions that are available for review. To begin reviewing a position, choose the Review link next to the position you want to review. Each Review link begins the review of the position on that row. If you want to review another position instead, choose the Review link next to that other position. You can use this workspace whenever you need to review positions.</p>
+</section>
+<section class="batch">
+<h2>Positions awaiting review</h2>
+<div class="rows">
+<table>
+<caption>2 positions, oldest first. Quantities are units.</caption>
+<thead><tr><th scope="col">Instrument</th><th scope="col">Quantity (units)</th><th scope="col">Action</th></tr></thead>
+<tbody>
+<tr><td>Acme Industries</td><td>1,200</td><td><a href="index.html">Review Acme</a></td></tr>
+<tr><td>Calder Group</td><td>340</td><td><a href="index.html">Review Calder</a></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+<p class="help">The review links resolve a client-side route through the hydration boundary, while the reconciliation adapter projects normalized entity records into the view-model cache. The rendering pipeline performs component reconciliation before committing the selected route.</p>
+</main>
+</body>
+</html>

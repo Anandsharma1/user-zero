@@ -86,7 +86,10 @@ Sensing rules (all adapters):
   pixel coordinates.
 - Screenshots are **mandatory evidence for every visual or experiential
   claim**, and are captured at journey milestones, failure states, and empty
-  states, across every viewport the charter declares.
+  states, across every viewport the charter declares. Open and examine them;
+  capture alone is not visual evaluation. After walking the task, record a
+  visual-and-copy review of every money screen at each declared viewport and
+  exercised theme, including when no concern was found (evidence schema).
 - Console and network activity are first-class evidence; an unexpected
   console error during a journey is a finding even when the screen looks fine.
 - Snapshot/inspect before acting; after any blocked interaction, re-snapshot

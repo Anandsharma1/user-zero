@@ -6,11 +6,11 @@ product: whoever knows the registry performs neither pass.
 
 ## Where the controls live
 
-The registry is `fixtures/controls.tsv` — 28 controls across 11 defect classes,
+The registry is `fixtures/controls.tsv` — 32 controls across 13 defect classes,
 each with a page, a probe string, and the observable signature a run that found
 it must report.
 
-**All 28 are `armed`, not merely `registered`**, and that is machine-checked
+**All 32 are `armed`, not merely `registered`**, and that is machine-checked
 rather than asserted:
 
 ```bash
@@ -40,6 +40,13 @@ Suggested first in-scope set for `fixture-dashboard` (9 controls, 7 classes —
 comfortably above the floor, small enough to review by hand):
 
 `KD-F01 KD-D01 KD-D03 KD-L01 KD-C01 KD-A01 KD-A02 KD-V01 KD-P03`
+
+For presentation calibration, add `KD-V05 KD-V06 KD-L04 KD-L05` to the
+predeclared dashboard set. Score **presentation/layout** and
+**presentation/copy** separately at the laptop viewport over two unchanged-build
+runs. After maintainer approval, use AE-F03 and AE-F04 as counterpart viewport
+states for both families; until then, presentation calibration is not measurable.
+These four controls alone do not meet the overall class floor.
 
 And for `fixture-queue` (6 controls, 4 classes):
 

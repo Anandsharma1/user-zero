@@ -202,6 +202,36 @@ an unthresholded metric is decoration):
 Below the bar: tune the charter (usually trim oracles or sharpen the Pass-A
 brief), do not tune the metric.
 
+## Presentation calibration: layout and copy
+
+When claiming calibration for presentation judgment, predeclare two separate
+control families: **presentation/layout** (space allocation, visual hierarchy,
+competing borders) and **presentation/copy** (unnecessary verbosity, irrelevant
+implementation explanation). Ordinary visual controls and obvious enum/ID leaks
+do not establish these abilities. Include accepted counterparts where compact
+layout, strong boundaries, detailed guidance, or technical vocabulary serve the
+persona's task. Approval is scoped to persona, state, viewport, and concern.
+
+Additional default bars, set before seeing results:
+
+| Metric | Default pass bar |
+|---|---|
+| Rediscovery per presentation family, per run | ≥ 70% of its predeclared armed controls, across ≥ 2 unchanged-build runs; report found / in-scope separately for each family |
+| Rejected actionable presentation findings on accepted counterparts | ≤ 1 per run, counting both defects and experience opportunities; report rejected / all actionable presentation findings and number of exemplars reviewed |
+
+Each family needs ≥ 2 armed controls and ≥ 2 approved counterpart states or
+viewports. Missing controls, missing exemplar review, or an unmeasured family
+means **not calibrated for presentation/layout** or **presentation/copy**;
+an aggregate rediscovery pass cannot replace the missing result. These are
+proposed acceptance bars, not measured evaluator performance. Other calibration
+requirements still apply, including the overall class/control floor.
+
+Evaluate recurrence on the unchanged build before crediting a repair. Apply the
+existing repair-lift protocol to a sample of presentation recommendations,
+checking that needed guidance, grouping, focus visibility, and other applicable
+behavior remain intact. Do not credit a change merely because the next reviewer
+failed to notice the same problem. Report results even if they worsen.
+
 ## A metric with no denominator is NOT a pass
 
 Tier agreement and actionability are the metrics the harness cannot produce

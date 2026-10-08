@@ -2,8 +2,9 @@
 
 Until now, calibrating this harness required a real product plus armed seeds,
 which is why no calibration had ever been run. These fixtures remove that
-excuse: a static app you can serve in one command, carrying **one seeded defect
-per class**, plus a curated clean page as a positive control.
+excuse: a static app you can serve in one command, carrying **32 seeded concerns
+across 13 classes**, plus curated clean pages and candidate presentation
+exemplars as positive controls.
 
 They exist to answer the only question that matters about an evaluator: *does it
 find the things that are actually there, and stay quiet about the things that are
@@ -20,7 +21,7 @@ fixtures/probe.sh                  # verifies every declared control is live (ar
 |---|---|
 | `apps/` | **the only directory served over HTTP** — the two apps and nothing else |
 | `apps/broken-app/` | the negative controls — every page carries seeded defects |
-| `apps/clean-app/` | the positive control — curated as acceptable, findings here are false positives |
+| `apps/clean-app/` | approved positive controls and candidate presentation counterparts; approval scope is in the exemplar records |
 | `controls.tsv` | the control registry: ID, class, page, probe, antiprobe, observable signature |
 | `explorer/PROFILE.md` | a ready product binding for the fixtures |
 | `explorer/charters/` | charters covering the fixture pages |
@@ -92,6 +93,22 @@ fixtures/probe.sh                        # must report every in-scope control AR
 Then score the seven metrics, and **publish the numbers in
 `docs/known-limitations.md` whether they are good or bad.** A calibration whose
 results are only reported when favourable is not a calibration.
+
+## Presentation controls and counterparts
+
+`broken-app/workspace.html` adds space allocation, competing borders, repetitive
+copy, and irrelevant implementation explanations. It is reached from the
+dashboard and covered by `fixture-dashboard`. `clean-app/workspace.html` keeps
+compact rows, useful domain vocabulary, task guidance with a strong boundary,
+and longer help behind disclosure. AE-F03 and AE-F04 scope these counterparts
+at laptop and mobile viewports; they are **candidates requiring maintainer
+approval**, not approved calibration inputs yet.
+
+Predeclare these controls alongside the dashboard controls, and score the
+presentation/layout and presentation/copy families separately over two blind,
+unchanged-build runs using the calibration protocol's additional bars. Overall
+rediscovery cannot compensate for a missing family. An operator who has seen
+this registry or authored the fixtures cannot perform either calibration pass.
 
 ## What fixtures cannot tell you
 

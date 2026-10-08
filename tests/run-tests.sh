@@ -796,7 +796,7 @@ t_fixture_clean_app_has_no_seeded_probes() {
   while IFS=$'\t' read -r id class page probe antiprobe signature; do
     case "${id:-}" in ''|'#'*) continue ;; esac
     [ "$probe" = "-" ] && continue
-    grep -qF -- "$probe" "$REPO/fixtures/apps/clean-app/index.html" 2>/dev/null && hits=$((hits+1))
+    grep -rqF -- "$probe" "$REPO/fixtures/apps/clean-app" 2>/dev/null && hits=$((hits+1))
   done < "$REPO/fixtures/controls.tsv"
   [ "$hits" -eq 0 ] && ok "the clean app contains none of the seeded defect probes" \
                     || no "exemplar purity" "$hits seeded probe(s) found in clean-app"
@@ -822,6 +822,31 @@ t_fixture_probe_detects_repair() {
   else
     no "antiprobe" "probe did not notice that KD-A02 was repaired"
   fi
+}
+
+t_fixture_presentation_repairs_are_detected() {
+  local tmp id class page probe antiprobe signature out bad=0 tested=0
+  while IFS=$'\t' read -r id class page probe antiprobe signature; do
+    case "$class" in presentation/layout|presentation/copy) ;; *) continue ;; esac
+    tested=$((tested+1))
+    tmp="$WORK/fxp$RANDOM"; cp -r "$REPO/fixtures" "$tmp"
+    # Remove only this concern in a fresh copy. The denominator must fail,
+    # regardless of the other controls remaining armed.
+    case "$id" in
+      KD-V05) sed -i 's/padding:160px 48px/padding:16px/' "$tmp/apps/$page" ;;
+      KD-V06) sed -i 's/border:8px solid #202124/border:1px solid #d5d7da/' "$tmp/apps/$page" ;;
+      KD-L04) sed -i '/<p>This workspace provides/c\<p>Choose a position to review.</p>' "$tmp/apps/$page" ;;
+      KD-L05) sed -i '/<p class="help">/d' "$tmp/apps/$page" ;;
+      *) bad=1; continue ;;
+    esac
+    out="$("$tmp/probe.sh" --quiet 2>&1)"
+    local rc=$?
+    if [ "$rc" -eq 0 ] || ! printf '%s' "$out" | grep -qF "MISSING  $id"; then
+      bad=1
+    fi
+  done < "$REPO/fixtures/controls.tsv"
+  [ "$bad" -eq 0 ] && [ "$tested" -eq 4 ] && ok "repairing each presentation control invalidates its calibration denominator" \
+                    || no "presentation denominator" "a repaired concern remained armed or was not identified"
 }
 
 # ============================================================ layer purity
@@ -895,7 +920,7 @@ for t in \
   t_fixture_controls_all_armed t_fixture_answer_key_is_not_under_served_dir \
   t_fixture_serve_refuses_if_key_inside t_fixture_served_files_have_no_comments \
   t_fixture_clean_app_has_no_seeded_probes t_fixture_probe_detects_drift \
-  t_fixture_probe_detects_repair \
+  t_fixture_probe_detects_repair t_fixture_presentation_repairs_are_detected \
   t_layer1_has_no_product_strings t_purity_hook_scans_staged_content \
   t_all_skill_refs_resolve; do
   "$t"

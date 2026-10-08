@@ -2,7 +2,8 @@
 
 High-severity findings raised against these and then rejected are the harness
 crying wolf. An empty exemplar set makes calibration fail preflight, so these
-two records are the minimum the protocol requires.
+first two records are the minimum the protocol requires. The presentation
+candidates below do not count until a maintainer records approval.
 
 ---
 
@@ -49,6 +50,40 @@ two records are the minimum the protocol requires.
 | | | | | accepted / rejected |
 
 ---
+
+### AE-F03 — review workspace, laptop
+
+- **Route + state:** `/clean-app/workspace.html` — loaded, populated; help closed,
+  then expanded by the reviewer.
+- **Persona:** `ops-newcomer` (also acceptable for `desk-reviewer`).
+- **Viewport + theme proposed:** laptop (1280×800), light.
+- **Approval status:** candidate exemplar added 2026-10-08; requires maintainer
+  approval before it counts toward a calibration denominator.
+- **Proposed as acceptable for:** presentation/layout and presentation/copy:
+  compact table rows allow comparison; a thin frame groups the table; a stronger
+  left border distinguishes task guidance. Domain terms such as custodian and
+  settlement date are relevant, with an explanation available on demand.
+- **Functional scope:** Review links return to the dashboard; a complete review
+  workflow is outside this presentation exemplar.
+- **Intentional details to preserve:** the visible comparison guidance and the
+  longer expanded help. Their length serves the task; shortening them solely to
+  satisfy a word count or removing all borders would be a false positive.
+- **Findings raised here (per run):** record finding, class/tier, and owner verdict.
+
+### AE-F04 — review workspace, mobile
+
+- **Route + state:** `/clean-app/workspace.html` — loaded, populated; help closed,
+  then expanded by the reviewer.
+- **Persona:** `ops-newcomer` (also acceptable for `desk-reviewer`).
+- **Viewport + theme proposed:** mobile (390×844), light.
+- **Approval status:** candidate exemplar added 2026-10-08; requires maintainer
+  approval before it counts toward a calibration denominator.
+- **Proposed as acceptable for:** presentation/layout and presentation/copy:
+  the table scrolls within its container, guidance remains visible, and expanded
+  help increases page length because it contains relevant instructions.
+- **Intentional details to preserve:** domain terminology and the guidance
+  border; scrolling after requesting help is not itself wasted screen space.
+- **Findings raised here (per run):** record finding, class/tier, and owner verdict.
 
 ## False-positive burden by run
 

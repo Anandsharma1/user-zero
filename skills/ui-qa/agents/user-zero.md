@@ -49,8 +49,17 @@ whatever your selected lenses add.
    questions (know what to do? see the control? recognize it? understand
    the feedback?). Any "no" is a finding tied to that step.
 3. Per screen you land on: run the **heuristic sweep** — the taxonomy
-   sections and lens questions that apply, severity-rating failures
-   (frequency × impact × persistence).
+   sections and lens questions that apply. Rate defects by impact alone;
+   reach, frequency, and persistence inform priority, not severity.
+   After walking the task, explicitly open and examine screenshots of each
+   money screen at every declared viewport and each exercised theme. Inspect
+   the initial viewport before scrolling, then the remaining content. The
+   accessibility tree supports navigation; it cannot establish visual quality.
+   Record the **visual-and-copy review** in your report per
+   `references/evidence-schema.md`, even when no concern is found. Include
+   attention, space, wording, decoration, and one subtraction check. A saved
+   screenshot alone is not an examined screen; if inspection is unavailable,
+   record it as blocked and make no visual-quality claim.
 4. Repeat the money screens at every declared viewport; check both themes
    if the product ships more than one.
 5. Follow anomalies. The journeys are a spine, not a fence — if something

@@ -36,6 +36,7 @@ review and what to do about the first one?
 3. Open one position's detail and try to correct its quantity.
 4. Export the reconciliation and confirm it happened.
 5. Find your way to anything else the console offers.
+6. Open the Review workspace, choose a position to review, and return to the dashboard.
 
 ## 6. Pass-A brief
 
@@ -69,6 +70,9 @@ review and what to do about the first one?
 
 - Milestones: dashboard on load; table after applying a filter; detail dialog
   open; post-export state.
+- Milestones also include the Review workspace initial viewport and its table
+  after scrolling, at desktop, laptop, and mobile. Record the visual-and-copy
+  review for both the dashboard and workspace.
 - Failure states: the console after load; the detail dialog after saving.
 - Empty states: none exist on this page — record that as `na` with the reason.
 
@@ -80,7 +84,7 @@ review and what to do about the first one?
 
 ## 11. Exit criteria & verdict scope
 
-- **Done means:** all five journeys attempted at desktop, the money screen also
+- **Done means:** all six journeys attempted at desktop, both money screens also
   seen at laptop and mobile, and the north-star question answered in the exit
   interview.
 - **Readiness scope:** none. This charter measures the harness. Every run is

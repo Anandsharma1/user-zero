@@ -2,7 +2,10 @@
 
 **Load when** the surface has grown by accretion (features added over
 releases), or when a redesign is being judged, or when the charter's
-north-star question is "is this screen too much?"
+north-star question is "is this screen too much?", or a new screen contains
+competing summaries, repeated explanations, or prominent implementation metadata.
+New development alone does not select this lens; the spine already includes a
+small subtraction check for every screen.
 
 Every other lens asks *is this done well?* This one asks *should this be here
 at all?* It is the only subtractive lens, and it is the one an evaluator is

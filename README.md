@@ -40,6 +40,12 @@ Two things make it more than "ask an AI to look at my UI":
 2. **Every finding needs proof.** A screenshot, the exact screen, what a user
    loses, and a specific fix. No "this feels cluttered."
 
+During new development, use `glance` for quick feedback and re-run after changes.
+The evaluator explicitly examines screenshots for attention, use of space,
+wording, decoration, and opportunities to shorten or disclose secondary content.
+It records that review even when it finds no concern. Technical terms, density,
+and strong borders are judged by their usefulness to the persona's task.
+
 ## What it checks
 
 Every judgement traces to a named principle, so a finding reads "this confused
@@ -362,7 +368,7 @@ you.
 | `scripts/check-platform-sync.sh` | fail if those pointers drift |
 | `skills/ui-qa/scripts/verify-run.sh` | the post-run check from step 7 |
 | `fixtures/serve.sh`, `fixtures/probe.sh` | the practice app and its bug checker |
-| `tests/run-tests.sh` | 82 tests for all of the above |
+| `tests/run-tests.sh` | 83 tests for all of the above |
 
 ---
 
@@ -505,13 +511,13 @@ practice app:
 
 ```bash
 fixtures/serve.sh &     # prints the URL
-fixtures/probe.sh       # confirms all 28 planted bugs are still there
+fixtures/probe.sh       # confirms all 32 planted concerns are still there
 # then, in a session that has NOT read fixtures/controls.tsv:
 /ui-qa fixture-dashboard --calibrate
 ```
 
-`fixtures/` contains a broken two-page app (28 planted bugs across 11 kinds), a
-clean app as the "should find nothing serious here" control, a ready profile,
+`fixtures/` contains a broken three-page app (32 planted concerns across
+13 kinds), a clean app as the "should find nothing serious here" control, a ready profile,
 two charters, and both calibration files. The answer key lives outside the
 served folder and the pages contain no comments at all, so the explorer cannot
 read the answers — and tests enforce both. See
@@ -525,7 +531,7 @@ read the answers — and tests enforce both. See
 ./scripts/install-git-hooks.sh                 # pre-commit checks
 ./scripts/sync-platform-dirs.sh                # after editing skills/ui-qa/
 ./scripts/check-platform-sync.sh --from-index  # verify what git will commit
-./tests/run-tests.sh                           # 82 tests, no dependencies
+./tests/run-tests.sh                           # 83 tests, no dependencies
 ```
 
 Two rules: edit only `skills/ui-qa/` (everything under `.claude/`, `.codex/`,

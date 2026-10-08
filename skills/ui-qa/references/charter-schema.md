@@ -123,7 +123,9 @@ Pass A judges every journey against these dimensions, as the persona:
   disabled-state explanations, retry paths, navigation continuity,
   duplicate-action prevention.
 - **Visual quality** — alignment, spacing, typography, contrast, density,
-  truncation, overflow, card/table consistency, awkward empty space.
+  truncation, overflow, card/table consistency, awkward empty space, and borders
+  or decoration competing with content. Record the visual-and-copy review
+  (evidence schema); charter focus dimensions do not waive it.
 - **Responsive quality** — layouts at each declared viewport; touch targets;
   horizontal overflow.
 - **Trustworthiness** — the screen distinguishes fact, estimate, unavailable
