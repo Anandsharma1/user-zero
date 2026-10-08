@@ -40,6 +40,95 @@ Two things make it more than "ask an AI to look at my UI":
 2. **Every finding needs proof.** A screenshot, the exact screen, what a user
    loses, and a specific fix. No "this feels cluttered."
 
+## What it checks
+
+Every judgement traces to a named principle, so a finding reads "this confused
+me *because* the heading names an internal feature" — not "this feels off". The
+principles come from Nielsen's heuristics, Norman's design principles, ISO
+9241-110, Gestalt, Fitts's and Hick's laws, WCAG, and the component guidance of
+Material, Apple HIG, Carbon and Polaris. They live in three places: the
+**spine** (always loaded), ten optional **lenses**, and the **evaluator's own
+operating rules**.
+
+### Data honesty — the checks ordinary tests skip
+
+- **Missing is never zero.** An unavailable value shows "—" or a label, never a
+  fabricated `0`.
+- **Every aggregate shows its denominator.** A percentage without its sample
+  size creates false confidence.
+- **No internals leak.** IDs, enum tokens, paths and stack traces never stand in
+  for names or error text.
+- **Numbers agree with each other.** Totals match their rows, two screens match,
+  and the rendered value matches the payload the page itself received.
+- **Saved means saved.** What you saved is still there after a reload.
+- **No pretending.** Nothing claims to be done before it is, fact / estimate /
+  unavailable / pending / rejected / failure each look different, and
+  placeholder data is unmistakable.
+
+### UX craft — the always-on spine
+
+Twelve areas, asked only where they apply to the screen in front of it. Full
+question list: [`ux-evaluation-taxonomy.md`](skills/ui-qa/references/ux-evaluation-taxonomy.md).
+
+| Area | What is checked |
+|---|---|
+| Layout | Grouping, alignment, consistency, emphasis, reading order |
+| Hierarchy and density | The answer comes first, detail is disclosed progressively, density suits the screen's job, headings use the user's words |
+| Right component for the job | Radio vs dropdown vs search by option count; modal vs drawer vs inline vs page; toast vs inline error vs banner vs dialog; button vs link |
+| Component behavior | No dead controls, disabled controls say why, safe defaults, destructive actions distanced and undoable, feedback within ~100 ms, keyboard and focus return |
+| Tables | Column order and width, numeric alignment, semantic sorting, per-cell loading / unavailable / error states |
+| Navigation | Orientation, Back and refresh safety, no dead ends, deep-linkable state |
+| Sizing and real estate | Targets of roughly 44 px or more, above-the-fold priority, readable line length, control size matching importance |
+| Type, colour, theme | WCAG AA contrast in every theme, colour never the only signal, one meaning per semantic colour |
+| Feedback and trust | Visible system status, empty states that say why, plain-language errors that keep the user's work |
+| Language | The user's vocabulary, one word per concept, labels over placeholders, buttons that say what they do |
+| Cognitive load | Few choices at a time, recognition over recall, short paths for frequent tasks |
+| Accessibility | Full keyboard traversal, visible focus, accessible names, headings and landmarks, reduced motion |
+
+Two structured methods run over these: a **cognitive walkthrough** per task
+(will the user know what to try, see the control, recognise it, and understand
+the feedback?) and a **heuristic sweep** per screen.
+
+### Lenses — loaded only when the surface needs them
+
+A charter names the one or two it needs. A lens that does not apply produces
+junk findings, and that gets measured.
+
+| Lens | Load when the surface… | Checks |
+|---|---|---|
+| [`ai-product-ux`](skills/ui-qa/lenses/ai-product-ux.md) | shows model-generated output, chat, or predictions | provenance, honest confidence, steerability, correction paths |
+| [`forms-and-validation`](skills/ui-qa/lenses/forms-and-validation.md) | collects input of consequence | validation timing, error summaries, preserved work, partial success |
+| [`data-visualization`](skills/ui-qa/lenses/data-visualization.md) | renders charts, gauges or maps | scale integrity, missing vs zero, uncertainty, encoding choice |
+| [`resilience-and-continuity`](skills/ui-qa/lenses/resilience-and-continuity.md) | holds sessions, unsaved work or long operations | expiry, offline, stale data, conflicts, honest degradation |
+| [`accessibility-dynamic`](skills/ui-qa/lenses/accessibility-dynamic.md) | has overlays, live regions, drag or auth | focus over time, announced changes, 200% / 400% zoom, pointer alternatives |
+| [`simplicity-and-restraint`](skills/ui-qa/lenses/simplicity-and-restraint.md) | has grown by accretion | what should not be there at all |
+| [`persuasion-and-dark-patterns`](skills/ui-qa/lenses/persuasion-and-dark-patterns.md) | asks for money, consent or personal data | choice symmetry, consent honesty, pressure tactics |
+| [`localization-and-locale`](skills/ui-qa/lenses/localization-and-locale.md) | ships in more than one language or region | text expansion, RTL, locale formats |
+| [`touch-and-mobile`](skills/ui-qa/lenses/touch-and-mobile.md) | is used on phones or tablets | thumb reach, gestures, interruption tolerance |
+| [`motion-and-timing`](skills/ui-qa/lenses/motion-and-timing.md) | animates, streams or has perceptible latency | purpose, duration, latency honesty, reduced motion |
+
+Registry with the exact triggers: [`lenses/MANIFEST.md`](skills/ui-qa/lenses/MANIFEST.md).
+
+### How it judges
+
+The evaluator's persona and operating rules are in
+[`agents/user-zero.md`](skills/ui-qa/agents/user-zero.md).
+
+- **Fresh eyes first, informed second.** Pass A never sees specs or source. Pass
+  B may explain a confusion but never delete it.
+- **Screenshot or it did not happen.** Every finding names its screen, what the
+  user loses, the principle violated, and a specific fix.
+- **Severity and priority are separate numbers.** Rarity never lowers severity;
+  traffic never raises it.
+- **Coverage is declared, not narrated.** Every required row is done with a
+  screenshot or skipped with a reason.
+- **Claims stay bounded.** Without an oracle it cannot say a value is correct,
+  and it does not measure users or replace research.
+- **Safe by construction.** It changes the app only through its UI, redacts
+  credentials as it captures, and a failed health check stops the run.
+
+---
+
 ## Two ways to run it
 
 Pick by what you want the output to be good for.
@@ -236,7 +325,7 @@ checks it stays quiet. Seven scores, each with a pass mark.
 |---|---|
 | `/ui-qa glance` | one expert look at a screen, no setup — see the table above |
 | `/ui-qa` command | runs charters, writes new ones, runs calibration |
-| `user-zero` agent | the evaluator itself — a senior UX reviewer who tests as your user but explains problems like an expert |
+| [`user-zero` agent](skills/ui-qa/agents/user-zero.md) | the evaluator itself — a senior UX reviewer who tests as your user but explains problems like an expert |
 | `PROFILE.md` | the one file describing *your* product: how to start it, who your users are, your wording and formatting rules, where your specs live |
 | `charters/*.md` | one small file per feature — about 50 lines each |
 | `calibration/` | known bugs and approved-good screens, used to score the harness |
@@ -244,18 +333,14 @@ checks it stays quiet. Seven scores, each with a pass mark.
 
 ### What the evaluator knows
 
-- **The spine** (`ux-evaluation-taxonomy.md`) — always loaded. Layout and
-  grouping, information hierarchy and density, choosing the right component
-  (drawer vs popup vs dropdown vs radio), component behaviour, table craft,
-  navigation and back-button safety, sizes and use of screen space, typography
-  and themes, honest states, wording, mental effort, accessibility. Plus the two
-  methods it uses: walking through a task step by step, and sweeping each screen
-  against the checklist.
-- **Ten lenses** (`lenses/`) — loaded only when relevant: AI/generated content,
-  forms and validation, charts, resilience and session loss, deeper
-  accessibility, simplicity, dark patterns, translations, touch/mobile, motion
-  and timing. A charter names the one or two it needs. Adding one that does not
-  apply produces junk findings, and that gets measured.
+- **The spine** — [`ux-evaluation-taxonomy.md`](skills/ui-qa/references/ux-evaluation-taxonomy.md),
+  always loaded: the twelve areas in [What it checks](#what-it-checks), plus the
+  walkthrough and sweep methods and the severity / priority model.
+- **Ten lenses** — [`lenses/`](skills/ui-qa/lenses/), loaded only when relevant,
+  listed in the table above.
+- **The persona** — [`agents/user-zero.md`](skills/ui-qa/agents/user-zero.md):
+  a senior UX reviewer who tests as your user but explains problems like an
+  expert.
 
 Lenses are read *by* the one evaluator. They are never run as separate
 reviewers — five reviewers means five overlapping reports and a merge job for
@@ -449,6 +534,13 @@ in the harness — those belong in `PROFILE.md`. See [AGENTS.md](AGENTS.md).
   charter, oracle, lens in plain terms, with a full e-commerce checkout example
   showing which concept produced which finding. Plus a glossary of every other
   term.
+- **[skills/ui-qa/references/ux-evaluation-taxonomy.md](skills/ui-qa/references/ux-evaluation-taxonomy.md)** —
+  the full question catalog behind [What it checks](#what-it-checks), plus the
+  severity / priority model.
+- **[skills/ui-qa/lenses/MANIFEST.md](skills/ui-qa/lenses/MANIFEST.md)** — the
+  ten lenses, when each loads, and the ideas deliberately left out.
+- **[skills/ui-qa/agents/user-zero.md](skills/ui-qa/agents/user-zero.md)** — the
+  evaluator's persona, sensing rules and hard rules.
 - **[docs/known-limitations.md](docs/known-limitations.md)** — what is proven,
   what is not, and which rules are enforced by code versus by instructions.
   Read this before trusting a run.
