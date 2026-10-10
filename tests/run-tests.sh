@@ -967,6 +967,67 @@ t_plugin_from_index_detects_partial_staging() {
     || ok "staged-index check catches stale plugin metadata despite a synced worktree"
 }
 
+# Cursor falls back to .claude-plugin/ for its catalog, so only the manifest is
+# generated. It exists to stop Cursor registering the Claude-only evaluator.
+t_cursor_plugin_registers_no_agent() {
+  run python3 - "$REPO" <<'PYCHECK' \
+    && ok "cursor manifest ships skill and browser by default discovery and registers no agent" \
+    || no "cursor plugin" "manifest would let Cursor scan agents/, override discovery, or lacks a catalog"
+import json, pathlib, sys
+r = pathlib.Path(sys.argv[1])
+p = json.loads((r / 'plugin.json').read_text())
+c = json.loads((r / '.cursor-plugin/plugin.json').read_text())
+assert c['name'] == p['name'] and c['version'] == p['version']
+# An empty list is normalized to "unset" by Cursor, which then scans agents/.
+assert isinstance(c['agents'], str), 'agents must be a path string, not a list'
+assert c['agents'].startswith('./') and '..' not in c['agents']
+target = r / c['agents'][2:]
+assert target.is_dir(), 'agents path must be a real directory'
+assert not [f for f in target.rglob('*') if f.suffix in ('.md', '.mdc', '.markdown')], 'agents path holds markdown'
+# Explicit skills/mcpServers paths would replace default discovery.
+assert 'skills' not in c and 'mcpServers' not in c
+assert (r / 'skills/ui-qa/SKILL.md').is_file() and (r / 'mcp.json').is_file()
+# The Claude agent must survive: Claude Code discovers it from agents/.
+assert (r / 'agents/user-zero.md').is_file()
+assert not (r / '.cursor-plugin/marketplace.json').exists()
+assert (r / '.claude-plugin/marketplace.json').is_file()
+PYCHECK
+}
+
+t_cursor_plugin_drift_is_caught_by_sync_check() {
+  local t; t="$(plugin_target)"
+  run "$t/scripts/sync-platform-dirs.sh" --root "$t" || { no "cursor baseline" "sync failed"; return; }
+  run "$t/scripts/check-platform-sync.sh" --root "$t" || { no "cursor baseline" "fresh generation rejected"; return; }
+  sed -i 's|"./.cursor-plugin/"|"./agents/"|' "$t/.cursor-plugin/plugin.json"
+  run "$t/scripts/check-platform-sync.sh" --root "$t" \
+    && no "cursor drift" "hand-edited Cursor manifest passed the platform sync check" \
+    || ok "platform sync check fails when the Cursor manifest is edited by hand"
+}
+
+t_cursor_plugin_refuses_unowned_file() {
+  local t; t="$(plugin_target)"
+  mkdir -p "$t/.cursor-plugin"
+  echo SENTINEL > "$t/.cursor-plugin/plugin.json"
+  run python3 "$t/scripts/sync-plugin-package.py" --root "$t"
+  local rc=$?
+  if [ "$rc" -ne 0 ] && [ "$(cat "$t/.cursor-plugin/plugin.json")" = SENTINEL ] \
+     && [ ! -e "$t/.claude-plugin/plugin.json" ] && [ ! -e "$t/agents/user-zero.md" ]; then
+    ok "an unowned Cursor manifest blocks all plugin writes, not just its own"
+  else no "cursor ownership" "unowned manifest overwritten or other outputs partially written"; fi
+}
+
+t_cursor_plugin_rejects_symlink() {
+  local t; t="$(plugin_target)"
+  mkdir -p "$t/victim"
+  echo SENTINEL > "$t/victim/plugin.json"
+  ln -s "$t/victim" "$t/.cursor-plugin"
+  run python3 "$t/scripts/sync-plugin-package.py" --root "$t"
+  local rc=$?
+  if [ "$rc" -ne 0 ] && [ "$(cat "$t/victim/plugin.json")" = SENTINEL ]; then
+    ok "plugin generator refuses a symlinked .cursor-plugin directory"
+  else no "cursor containment" "generation reached a symlink target"; fi
+}
+
 # ============================================================ layer purity
 
 t_layer1_has_no_product_strings() {
@@ -1043,6 +1104,8 @@ for t in \
   t_plugin_generator_refuses_unowned_file t_plugin_generator_rejects_symlink \
   t_plugin_from_index_detects_partial_staging t_install_preserves_product_plugin \
   t_native_skill_copy_is_self_contained \
+  t_cursor_plugin_registers_no_agent t_cursor_plugin_drift_is_caught_by_sync_check \
+  t_cursor_plugin_refuses_unowned_file t_cursor_plugin_rejects_symlink \
   t_layer1_has_no_product_strings t_purity_hook_scans_staged_content \
   t_all_skill_refs_resolve; do
   "$t"

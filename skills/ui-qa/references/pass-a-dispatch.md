@@ -53,6 +53,14 @@ supports per-skill agent metadata (the generated `openai.yaml` beside the
 platform's skill stub), keep implicit invocation disabled so Pass A is never
 entered accidentally from a context that has already read specs.
 
+**Cursor.** Not a verified Pass-A platform. The Cursor plugin ships the skill
+and the browser server but deliberately no evaluator agent: Cursor's agent
+frontmatter documents no tool grant, so nothing would bound the explorer to
+Read, Write, and the browser, and a fresh context has not been measured. Run
+Pass B only, and label the output *Pass-B only — no fresh-eyes evidence*. A
+brand-new chat given only the packet is possible but unmeasured; if you use one,
+say so in the run label rather than claiming a Pass-A dispatch.
+
 **Any platform.** If you cannot guarantee a fresh context, you cannot run
 Pass A. Run Pass B only, and label the output *Pass-B only — no fresh-eyes
 evidence*. A contaminated Pass A is worse than a missing one, because it

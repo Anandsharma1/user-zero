@@ -28,6 +28,18 @@ def outputs(root):
         raise ValueError("plugin name must remain user-zero; agent and catalog bindings use it")
     claude = dict(identity, mcpServers="./mcp.json")
     codex = dict(identity, skills="./skills/", mcpServers="./mcp.json")
+    # Cursor resolves its manifest as .cursor-plugin/plugin.json, then
+    # .claude-plugin/plugin.json, then plugin.json, and falls back to
+    # .claude-plugin/marketplace.json for catalogs -- so no Cursor catalog is
+    # generated. A Cursor-owned manifest exists for one reason: without it,
+    # Cursor scans agents/ and registers the Claude-only evaluator, whose
+    # `tools:` grant Cursor does not enforce. `agents` is pointed at this
+    # directory, which holds no markdown, so no agent is registered. Do not use
+    # `[]`: Cursor 3.22.7 normalizes an empty list to "unset" and then scans
+    # agents/. Skills and the browser server use Cursor's default discovery
+    # (skills/, mcp.json), which explicit paths would replace.
+    cursor = dict(identity, displayName=package["name"].replace("-", " ").title(),
+                  keywords=package.get("keywords", []), agents="./.cursor-plugin/")
     claude_catalog = {
         "name": "user-zero", "owner": package["author"],
         "metadata": {"description": package["description"]},
@@ -64,6 +76,7 @@ Write only to the evidence directory and include the canonical read declaration.
         ".claude-plugin/plugin.json": encoded(claude),
         ".claude-plugin/marketplace.json": encoded(claude_catalog),
         ".codex-plugin/plugin.json": encoded(codex),
+        ".cursor-plugin/plugin.json": encoded(cursor),
         ".agents/plugins/marketplace.json": encoded(codex_catalog),
         "agents/user-zero.md": agent,
     }

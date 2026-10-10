@@ -5,7 +5,8 @@ reviews it the way a good human tester would — walking through real tasks,
 noticing what is confusing, checking whether the numbers on screen are honest —
 and writes up what it finds with screenshots as proof.
 
-Works with Claude Code and Codex from one shared source.
+Works with Claude Code and Codex from one shared source, and runs in Cursor as
+a Pass-B-only skill (see [Installation](#cursor)).
 
 The reviewer is an AI agent; the **harness** is everything around it that makes
 its output worth believing — starting the app safely, deciding what must be
@@ -394,6 +395,8 @@ Choose one route per host:
 |---|---|---|
 | Codex skill installer | Personal `ui-qa` skill, references, lenses, and run gate | Register the browser separately; full runs need a profile and charters |
 | Codex or Claude Code plugin | The same canonical skill plus pinned browser configuration; Claude also gets the evaluator agent | `glance` needs an app URL; full runs need a profile and charters |
+| Cursor personal skill | Personal `ui-qa` skill in `~/.cursor/skills/` | Register the browser in Cursor; Pass B only; full runs need a profile and charters |
+| Cursor plugin | The canonical skill plus the pinned browser configuration; **no evaluator agent** | Needs plugin installs your Cursor team allows; Pass B only |
 | Repository script | Harness files, platform pointers, and product profile/charter templates in your repo | Register the browser and fill in the product binding |
 
 **Codex: paste this into a conversation** (not your shell):
@@ -465,7 +468,8 @@ See [docs/OPERATIONS.md](docs/OPERATIONS.md#native-skill-and-plugin-installation
 for upgrades, removal, local package validation, and compatibility evidence.
 Native mechanisms: [Codex skills](https://learn.chatgpt.com/docs/build-skills),
 [OpenAI plugin packaging](https://developers.openai.com/plugins/build/plugins),
-and [Claude Code plugins](https://code.claude.com/docs/en/plugins).
+[Claude Code plugins](https://code.claude.com/docs/en/plugins), and
+[Cursor plugins](https://cursor.com/docs/plugins).
 
 Repository installer options:
 
@@ -513,6 +517,78 @@ cd user-zero && git pull
 Harness code is replaced; your work is untouched. Afterwards, check whether the
 browser tool version moved, and remember that a newly added lens does nothing
 until a charter names it.
+
+### Cursor
+
+Cursor runs the skill and the browser, but **Pass B only**. The Claude evaluator
+agent is deliberately not registered: Cursor documents no tool grant to bound it,
+and a fresh-context Pass A has not been measured there. See
+`skills/ui-qa/references/pass-a-dispatch.md`.
+
+**1. Install the skill** (personal, works in every project). From a checkout of
+this repository:
+
+```bash
+mkdir -p ~/.cursor/skills
+cp -r skills/ui-qa ~/.cursor/skills/ui-qa
+```
+
+Copy the canonical `skills/ui-qa/` directory, not a generated `.cursor/`,
+`.agents/` or `.claude/` pointer: a pointer stub refers back to a repository
+that will not exist in your product workspace. The folder name must stay `ui-qa`
+to match the skill's `name`. Then run **Developer: Reload Window**.
+
+**2. Register the browser.** Add the pinned, isolated Playwright server to
+`~/.cursor/mcp.json` (all projects) or `.cursor/mcp.json` (one project):
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@0.0.78", "--isolated"]
+    }
+  }
+}
+```
+
+If Cursor already lists a Playwright server (for example one imported from a
+Claude Code plugin), check its version and that it runs `--isolated`, or the
+adapter's measured caveats do not apply. Cursor names MCP tools differently from
+Claude Code; use the names Cursor actually lists.
+
+**3. Check it.** In Customize, search for `ui-qa` under Skills, or type `/ui-qa`
+in an Agent chat. Then start with `/ui-qa glance <url>`. With no browser tools
+listed, the skill cannot run — fix step 2 first.
+
+**Update or remove.** The install is a snapshot. After the skill changes:
+`rm -r ~/.cursor/skills/ui-qa && cp -r skills/ui-qa ~/.cursor/skills/ui-qa`. To
+uninstall: `rm -r ~/.cursor/skills/ui-qa`.
+
+**Per repository.** `./scripts/install.sh /path/to/product --platforms "claude codex cursor"`
+also writes pointers Cursor reads (`.agents/skills/`, `.claude/skills/`,
+`.cursor/skills/`), alongside the harness copy and product templates.
+
+**Cursor plugin (optional).** The package carries a Cursor manifest
+(`.cursor-plugin/plugin.json`) and reuses the Claude catalog
+(`.claude-plugin/marketplace.json`), which Cursor falls back to. It supplies the
+skill and the pinned browser server in one install. It is not on the public Cursor
+marketplace, so there are two routes:
+
+- **Local:** copy this checkout into `~/.cursor/plugins/local/user-zero`, then
+  reload the window. Prefer a copy to a symlink: per the 3.22.7 loader code, a
+  symlink whose target is outside that directory is rejected. This route is
+  **disabled when your Cursor team's admin turns off local plugin imports**; the
+  Cursor Plugins log then shows `userLocal=false` and the plugin never appears.
+  Use the personal skill above instead.
+- **Team:** an admin imports the repository under Dashboard → Plugins & MCPs.
+
+**What has and has not been verified.** The manifest, discovery rules and the
+team-policy gate were checked against Cursor's documentation and the 3.22.7
+loader code, and the packaging is tested. No plugin install and no QA run has been
+observed working in Cursor, and the personal-skill route is unconfirmed until you
+see `ui-qa` listed. Details and the local verification steps:
+[docs/OPERATIONS.md](docs/OPERATIONS.md#native-skill-and-plugin-installation).
 
 ---
 

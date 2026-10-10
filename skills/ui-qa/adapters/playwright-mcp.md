@@ -32,6 +32,13 @@ codex mcp list                            # verify it actually registered
 (equivalent `config.toml` entry: `[mcp_servers.playwright]` with
 `command = "npx"`, `args = ["-y", "@playwright/mcp@0.0.78", "--isolated"]`)
 
+**Cursor** — project `.cursor/mcp.json` (or the user-level `~/.cursor/mcp.json`),
+the same `mcpServers` block as Claude Code's. The Cursor plugin supplies this
+itself. Cursor names MCP tools differently from Claude Code, so bind the
+capability mapping below to the tool names Cursor actually lists and confirm
+them in the mission packet. None of the caveats below have been measured under
+Cursor.
+
 - **Pinned** at `0.0.78` (2026-07). Bump deliberately; never `@latest`. The
   caveats measured below are version-specific — re-measure them when you bump.
 - `--isolated` starts every session with a fresh browser profile — this is

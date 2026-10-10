@@ -65,7 +65,7 @@ else
     done
     mkdir -p "$ACTUAL/scripts"
     cp "$ROOT/scripts/sync-plugin-package.py" "$ACTUAL/scripts/"
-    for d in .claude-plugin .codex-plugin agents; do
+    for d in .claude-plugin .codex-plugin .cursor-plugin agents; do
       [ ! -d "$ROOT/$d" ] || cp -r "$ROOT/$d" "$ACTUAL/$d"
     done
   fi
@@ -85,7 +85,7 @@ if [ -f "$ACTUAL/plugin.json" ] && [ -f "$ACTUAL/scripts/sync-plugin-package.py"
   done
   mkdir -p "$EXPECT/scripts"
   cp "$ACTUAL/scripts/sync-plugin-package.py" "$EXPECT/scripts/"
-  CHECK_DIRS="$CHECK_DIRS .claude-plugin .codex-plugin agents"
+  CHECK_DIRS="$CHECK_DIRS .claude-plugin .codex-plugin .cursor-plugin agents"
 fi
 
 # ...using the generator from that same tree. Under --from-index, running the
